@@ -1,3 +1,5 @@
+import math
+
 deer = {}
 
 def preprocess_input(input):
@@ -7,7 +9,11 @@ def preprocess_input(input):
     input = input.replace(' seconds.', '')
     return input
 
-with open('input_14.txt', 'r') as f:
+with open('input_14-test.txt', 'r') as f:
+# with open('input_14.txt', 'r') as f:
+    stop_time = 1000
+    # stop_time = 2503
+
     input = f.read()
     input = preprocess_input(input)
     print(input)
@@ -16,7 +22,6 @@ with open('input_14.txt', 'r') as f:
         deer[name] = {'speed': int(speed), 'time': int(time), 'rest': int(rest)}
     # print(deer)
 
-    stop_time = 2503
     max = 0
     for d in deer.keys():
         cycle_time = deer[d]['time'] + deer[d]['rest']
@@ -29,7 +34,7 @@ with open('input_14.txt', 'r') as f:
         if partial_time > deer[d]['time']:
             fly_time += deer[d]['time']
         else:
-            fly_time += int(partial_time)
+            fly_time += math.ceil(partial_time)
         dist = deer[d]['speed'] * fly_time
         print(d, dist)
         if dist > max:
