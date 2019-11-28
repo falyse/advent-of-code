@@ -14,8 +14,8 @@ def get_sum(input):
     else:
         return 0
 
-with open('input_12.txt', 'r') as f:
-# with open('input_12-test.txt', 'r') as f:
+with open('input.txt', 'r') as f:
+# with open('test.txt', 'r') as f:
     # input = f.read()
     # matches = re.findall(r'-?\d+', input)
     # print(matches)

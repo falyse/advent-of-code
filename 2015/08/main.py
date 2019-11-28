@@ -20,8 +20,8 @@ def num_encoded_chars(str):
     str = str.replace('\\', '..')
     return num_code_chars(str)
 
-# with open('input_08-test.txt', 'r') as f:
-with open('input_08.txt', 'r') as f:
+# with open('test.txt', 'r') as f:
+with open('input.txt', 'r') as f:
     input = f.readlines()
     input = [x.strip() for x in input]
 

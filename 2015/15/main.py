@@ -26,8 +26,8 @@ def get_score():
 def get_calories():
     return sum([data[x]['ratio'] * data[x]['calories'] for x in data])
 
-# with open('input_15-test.txt', 'r') as f:
-with open('input_15.txt', 'r') as f:
+# with open('test.txt', 'r') as f:
+with open('input.txt', 'r') as f:
     process_input(f.read())
     print(data)
 

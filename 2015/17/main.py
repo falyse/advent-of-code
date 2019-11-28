@@ -1,6 +1,6 @@
 from itertools import combinations
 
-with open('input_17.txt', 'r') as f:
+with open('input.txt', 'r') as f:
     containers = [int(x) for x in f.readlines()]
     # containers = [20, 15, 10, 5, 5]
     # total = 25

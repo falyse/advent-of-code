@@ -73,8 +73,8 @@ def process_line(line):
     gates.append(Gate(op, dst, src0, src1))
 
 
-# with open('input_07-test.txt', 'r') as f:
-with open('input_07-2.txt', 'r') as f:
+# with open('test.txt', 'r') as f:
+with open('input-2.txt', 'r') as f:
     input = f.readlines()
 
     for x in input:

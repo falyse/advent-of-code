@@ -24,7 +24,7 @@ def process_input(input):
             sues[id][k] = int(v)
     # print(sues)
 
-with open('input_16.txt', 'r') as f:
+with open('input.txt', 'r') as f:
     process_input(f.read())
     for sue in sues.keys():
         match = True

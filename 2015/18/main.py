@@ -51,8 +51,8 @@ def update_lights():
     lights = new_lights
     return num_on
 
-with open('input_18.txt', 'r') as f:
-# with open('input_18-test.txt', 'r') as f:
+with open('input.txt', 'r') as f:
+# with open('test.txt', 'r') as f:
     for line in f.readlines():
         row = []
         for char in line.strip():

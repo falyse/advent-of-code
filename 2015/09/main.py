@@ -6,8 +6,8 @@ class Route():
         self.end = end
         self.distance = distance
 
-# with open('input_09-test.txt', 'r') as f:
-with open('input_09.txt', 'r') as f:
+# with open('test.txt', 'r') as f:
+with open('input.txt', 'r') as f:
     input = f.readlines()
     places = {}
     routes = {}

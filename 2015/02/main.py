@@ -19,7 +19,7 @@ def get_ribbon(dims):
     print('wrap', wrap, ', bow', bow, ', total', total)
     return total
 
-with open('input_02.txt', 'r') as f:
+with open('input.txt', 'r') as f:
     input = f.readlines()
     # input = ['2x3x4', '1x1x10']
     area = sum([get_area(x) for x in input])

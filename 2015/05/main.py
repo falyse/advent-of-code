@@ -50,7 +50,7 @@ def has_interrupted_repeat(str):
         i += 1
     return False
 
-with open('input_05.txt', 'r') as f:
+with open('input.txt', 'r') as f:
     input = f.readlines()
     # input = ['ugknbfddgicrmopn', 'aaa', 'jchzalrnumimnmhp', 'haegwjzuvuyypxyu', 'dvszwmarrgswjxmb']
     # input = ['qjhvhtzxzqqjkmpb', 'xxyxx', 'uurcxstgmygtbstg', 'ieodomkazucvgmuy']

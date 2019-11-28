@@ -16,8 +16,8 @@ def add_yourself():
         happy['you'][guest] = 0
         happy[guest]['you'] = 0
 
-with open('input_13.txt', 'r') as f:
-# with open('input_13-test.txt', 'r') as f:
+with open('input.txt', 'r') as f:
+# with open('test.txt', 'r') as f:
     input = f.read()
     input = preprocess_input(input)
     for line in input.splitlines():

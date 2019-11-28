@@ -24,7 +24,7 @@ def process_input_steps(input):
         add_gift(x, y)
     print(houses)
 
-with open('input_03.txt', 'r') as f:
+with open('input.txt', 'r') as f:
     input = f.read()
     # input = '^v^v^v^v^v'
     santa_input = []

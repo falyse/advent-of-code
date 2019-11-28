@@ -20,7 +20,7 @@ def get_coords(range):
     return int(x), int(y)
 
 
-with open('input_06.txt', 'r') as f:
+with open('input.txt', 'r') as f:
     input = f.readlines()
     #input = [
     #   'turn on 0,0 through 9,9',

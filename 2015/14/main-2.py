@@ -9,8 +9,8 @@ def preprocess_input(input):
     input = input.replace(' seconds.', '')
     return input
 
-# with open('input_14-test.txt', 'r') as f:
-with open('input_14.txt', 'r') as f:
+# with open('test.txt', 'r') as f:
+with open('input.txt', 'r') as f:
     # stop_time = 1000
     stop_time = 2503
 

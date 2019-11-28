@@ -35,8 +35,8 @@ def run(word, steps=1):
     new_words = set(new_words)
     print(new_words)
 
-with open('input_19.txt', 'r') as f:
-# with open('input_19-test.txt', 'r') as f:
+with open('input.txt', 'r') as f:
+# with open('test.txt', 'r') as f:
     for line in f.readlines():
         k, v = line.strip().split(' => ')
         maps.append({v: k})

@@ -7,8 +7,8 @@ start = 'CRnSiRnCaPTiMgYCaPTiRnFArSiThFArCaSiThSiThPBCaCaSiRnSiRnTiTiMgArPBCaPMg
 # 193 too low
 
 maps = []
-with open('input_19.txt', 'r') as f:
-# with open('input_19-test.txt', 'r') as f:
+with open('input.txt', 'r') as f:
+# with open('test.txt', 'r') as f:
     for line in f.readlines():
         k, v = line.strip().split(' => ')
         maps.append({k: v})
