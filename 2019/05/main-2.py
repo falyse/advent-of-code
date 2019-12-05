@@ -5,7 +5,33 @@ def process_input(input):
     return input
 
 
+def run_program():
+    global pc
+    pc = 0
+    input_param = 5
+    output_param = None
+    while True:
+        cmd = program[pc]
+        op, modes = decode_cmd(cmd)
+        print('pc', pc, 'cmd', cmd, 'op', op)
+        if op == 99:  # Halt instruction
+            break
+        instr = decode_op(op, input_param)
+        instr.run(modes)
+        pc = instr.update_pc(pc)
+        if hasattr(instr, 'output_param'):
+            output_param = instr.output_param
+        if pc >= len(program):
+            break
+    print('Done. Output =', output_param)
+
+    if output_param != 9006327:
+        print('Refactor error')
+        exit(1)
+
+
 def get_param_modes(cmd_bits):
+    global modes
     modes = [int(x) for x in cmd_bits]
     modes = list(reversed(modes))
     # Add zeros for unspecified modes
@@ -43,10 +69,10 @@ def decode_op(op, input_param):
 
 class Instruction:
     def get_params(self):
-        return [input[pc+i] for i in range(1, self.num_params + 1)]
+        return [program[pc+i] for i in range(1, self.num_params + 1)]
 
     def resolve_param(self, value, mode):
-        return value if mode == 1 else input[value]
+        return value if mode == 1 else program[value]
 
     def run(self, modes):
         pass
@@ -64,7 +90,7 @@ class Add(Instruction):
         # print('src0', src0, 'src1', src1, 'dst', dst)
         s0 = self.resolve_param(src0, modes[0])
         s1 = self.resolve_param(src1, modes[1])
-        input[dst] = s0 + s1
+        program[dst] = s0 + s1
 
 
 class Multiply(Instruction):
@@ -76,7 +102,7 @@ class Multiply(Instruction):
         # print('src0', src0, 'src1', src1, 'dst', dst)
         s0 = self.resolve_param(src0, modes[0])
         s1 = self.resolve_param(src1, modes[1])
-        input[dst] = s0 * s1
+        program[dst] = s0 * s1
 
 
 class Input(Instruction):
@@ -86,7 +112,7 @@ class Input(Instruction):
 
     def run(self, modes):
         dst, = self.get_params()
-        input[dst] = self.input_param
+        program[dst] = self.input_param
 
 
 class Output(Instruction):
@@ -136,7 +162,7 @@ class LessThan(Instruction):
         # print('src0', src0, 'src1', src1, 'dst', dst)
         s0 = self.resolve_param(src0, modes[0])
         s1 = self.resolve_param(src1, modes[1])
-        input[dst] = 1 if s0 < s1 else 0
+        program[dst] = 1 if s0 < s1 else 0
 
 
 class Equals(Instruction):
@@ -148,34 +174,11 @@ class Equals(Instruction):
         # print('src0', src0, 'src1', src1, 'dst', dst)
         s0 = self.resolve_param(src0, modes[0])
         s1 = self.resolve_param(src1, modes[1])
-        input[dst] = 1 if s0 == s1 else 0
+        program[dst] = 1 if s0 == s1 else 0
 
 
 with open('input.txt', 'r') as f:
     # with open('test.txt', 'r') as f:
-    global input
     input = process_input(f.read())
-
-    pc = 0
-    input_param = 5
-    output_param = None
-    while True:
-        cmd = input[pc]
-        op, modes = decode_cmd(cmd)
-        print('pc', pc, 'cmd', cmd, 'op', op)
-        if op == 99:  # Halt instruction
-            break
-        instr = decode_op(op, input_param)
-        instr.run(modes)
-        pc = instr.update_pc(pc)
-        if hasattr(instr, 'output_param'):
-            output_param = instr.output_param
-        if pc >= len(input):
-            break
-    print('Done. Output =', output_param)
-
-    if output_param != 9006327:
-        print('Refactor error')
-        exit(1)
-
-
+    program = input.copy()
+    run_program()
