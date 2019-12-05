@@ -68,8 +68,14 @@ def decode_op(op, input_param):
 
 
 class Instruction:
-    def get_params(self):
-        return [program[pc+i] for i in range(1, self.num_params + 1)]
+    def get_params(self, modes):
+        params = []
+        for i in range(len(self.param_format)):
+            param = program[pc+i+1]
+            if self.param_format[i] == 'src':
+                param = self.resolve_param(param, modes[i])
+            params.append(param)
+        return params
 
     def resolve_param(self, value, mode):
         return value if mode == 1 else program[value]
@@ -78,103 +84,86 @@ class Instruction:
         pass
 
     def update_pc(self, pc):
-        return pc + self.num_params + 1
+        return pc + len(self.param_format) + 1
 
 
 class Add(Instruction):
     def __init__(self):
-        self.num_params = 3
+        self.param_format = ['src', 'src', 'dst']
 
     def run(self, modes):
-        src0, src1, dst = self.get_params()
-        # print('src0', src0, 'src1', src1, 'dst', dst)
-        s0 = self.resolve_param(src0, modes[0])
-        s1 = self.resolve_param(src1, modes[1])
-        program[dst] = s0 + s1
+        src0, src1, dst = self.get_params(modes)
+        program[dst] = src0 + src1
 
 
 class Multiply(Instruction):
     def __init__(self):
-        self.num_params = 3
+        self.param_format = ['src', 'src', 'dst']
 
     def run(self, modes):
-        src0, src1, dst = self.get_params()
-        # print('src0', src0, 'src1', src1, 'dst', dst)
-        s0 = self.resolve_param(src0, modes[0])
-        s1 = self.resolve_param(src1, modes[1])
-        program[dst] = s0 * s1
+        src0, src1, dst = self.get_params(modes)
+        program[dst] = src0 * src1
 
 
 class Input(Instruction):
     def __init__(self, input_param):
-        self.num_params = 1
         self.input_param = input_param
+        self.param_format = ['dst']
 
     def run(self, modes):
-        dst, = self.get_params()
+        dst, = self.get_params(modes)
         program[dst] = self.input_param
 
 
 class Output(Instruction):
     def __init__(self):
-        self.num_params = 1
+        self.param_format = ['src']
 
     def run(self, modes):
-        src0, = self.get_params()
-        s0 = self.resolve_param(src0, modes[0])
-        self.output_param = s0
+        src0, = self.get_params(modes)
+        self.output_param = src0
 
 
 class JumpIfTrue(Instruction):
     def __init__(self):
-        self.num_params = 2
+        self.param_format = ['src', 'src']
 
     def update_pc(self, pc):
-        src0, src1 = self.get_params()
-        s0 = self.resolve_param(src0, modes[0])
-        s1 = self.resolve_param(src1, modes[1])
-        if s0:
-            return s1
+        src0, src1 = self.get_params(modes)
+        if src0:
+            return src1
         else:
             return super().update_pc(pc)
 
 
 class JumpIfFalse(Instruction):
     def __init__(self):
-        self.num_params = 2
+        self.param_format = ['src', 'src']
 
     def update_pc(self, pc):
-        src0, src1 = self.get_params()
-        s0 = self.resolve_param(src0, modes[0])
-        s1 = self.resolve_param(src1, modes[1])
-        if not s0:
-            return s1
+        src0, src1 = self.get_params(modes)
+        if not src0:
+            return src1
         else:
             return super().update_pc(pc)
 
 
 class LessThan(Instruction):
     def __init__(self):
-        self.num_params = 3
+        self.param_format = ['src', 'src', 'dst']
 
     def run(self, modes):
-        src0, src1, dst = self.get_params()
-        # print('src0', src0, 'src1', src1, 'dst', dst)
-        s0 = self.resolve_param(src0, modes[0])
-        s1 = self.resolve_param(src1, modes[1])
-        program[dst] = 1 if s0 < s1 else 0
+        src0, src1, dst = self.get_params(modes)
+        program[dst] = 1 if src0 < src1 else 0
 
 
 class Equals(Instruction):
     def __init__(self):
-        self.num_params = 3
+        self.param_format = ['src', 'src', 'dst']
 
     def run(self, modes):
-        src0, src1, dst = self.get_params()
-        # print('src0', src0, 'src1', src1, 'dst', dst)
-        s0 = self.resolve_param(src0, modes[0])
-        s1 = self.resolve_param(src1, modes[1])
-        program[dst] = 1 if s0 == s1 else 0
+        src0, src1, dst = self.get_params(modes)
+        program[dst] = 1 if src0 == src1 else 0
 
 
 with open('input.txt', 'r') as f:
