@@ -1,28 +1,37 @@
-def get_modes(p):
-    modes = [int(x) for x in p]
+def process_input(input):
+    input = input.split(',')
+    input = [int(x) for x in input]
+    print(input)
+    return input
+
+def get_param_modes(cmd_bits):
+    modes = [int(x) for x in cmd_bits]
     modes = list(reversed(modes))
-    print('modes', modes)
+    # Add zeros for unspecified modes
+    while len(modes) < 2:
+        modes.append(0)
+    # print('modes', modes)
     return modes
+
+def decode_cmd(cmd):
+    cmd = str(cmd)
+    op = int(cmd[-2:])  # Last 2 bits are opcode
+    modes = get_param_modes(cmd[:-2])  # Other bits are parameter modes
+    return op, modes
 
 
 with open('input.txt', 'r') as f:
 # with open('test.txt', 'r') as f:
-    input = f.read()
-    input = input.split(',')
-    input = [int(x) for x in input]
-    input_orig = input.copy()
-    print(input)
+    input = process_input(f.read())
 
     pc = 0
-    stop = False
     input_param = 5
     output_param = None
-    while not stop:
+    while True:
         cmd = input[pc]
-        print('pc', pc, 'cmd', cmd)
-        op = int(str(cmd)[-2:])
-        modes = get_modes(str(cmd)[:-2])
-        print('op', op)
+        op, modes = decode_cmd(cmd)
+        print('pc', pc, 'cmd', cmd, 'op', op)
+        # Halt
         if op == 99:
             break
         if op == 1:
@@ -30,10 +39,6 @@ with open('input.txt', 'r') as f:
             src1 = input[pc+2]
             dst = input[pc+3]
             # print('src0', src0, 'src1', src1, 'dst', dst)
-            if len(modes) == 0:
-                modes = [0, 0]
-            if len(modes) == 1:
-                modes.append(0)
             s0 = src0 if modes[0] == 1 else input[src0]
             s1 = src1 if modes[1] == 1 else input[src1]
             input[dst] = s0 + s1
@@ -43,10 +48,6 @@ with open('input.txt', 'r') as f:
             src1 = input[pc+2]
             dst = input[pc+3]
             # print('src0', src0, 'src1', src1, 'dst', dst)
-            if len(modes) == 0:
-                modes = [0, 0]
-            if len(modes) == 1:
-                modes.append(0)
             s0 = src0 if modes[0] == 1 else input[src0]
             s1 = src1 if modes[1] == 1 else input[src1]
             input[dst] = s0 * s1
@@ -54,23 +55,16 @@ with open('input.txt', 'r') as f:
             pc += 4
         if op == 3:
             dst = input[pc+1]
-            # s0 = input_param if modes[0] == 1 else input[input_param]
             input[dst] = input_param
             pc += 2
         if op == 4:
             src0 = input[pc+1]
-            if len(modes) == 0:
-                modes = [0]
             s0 = src0 if modes[0] == 1 else input[src0]
             output_param = s0
             pc += 2
         if op == 5:
             src0 = input[pc+1]
             src1 = input[pc+2]
-            if len(modes) == 0:
-                modes = [0, 0]
-            if len(modes) == 1:
-                modes.append(0)
             s0 = src0 if modes[0] == 1 else input[src0]
             s1 = src1 if modes[1] == 1 else input[src1]
             if s0:
@@ -80,10 +74,6 @@ with open('input.txt', 'r') as f:
         if op == 6:
             src0 = input[pc+1]
             src1 = input[pc+2]
-            if len(modes) == 0:
-                modes = [0, 0]
-            if len(modes) == 1:
-                modes.append(0)
             s0 = src0 if modes[0] == 1 else input[src0]
             s1 = src1 if modes[1] == 1 else input[src1]
             if not s0:
@@ -95,10 +85,6 @@ with open('input.txt', 'r') as f:
             src1 = input[pc+2]
             dst = input[pc+3]
             # print('src0', src0, 'src1', src1, 'dst', dst)
-            if len(modes) == 0:
-                modes = [0, 0]
-            if len(modes) == 1:
-                modes.append(0)
             s0 = src0 if modes[0] == 1 else input[src0]
             s1 = src1 if modes[1] == 1 else input[src1]
             input[dst] = 1 if s0 < s1 else 0
@@ -108,10 +94,6 @@ with open('input.txt', 'r') as f:
             src1 = input[pc+2]
             dst = input[pc+3]
             # print('src0', src0, 'src1', src1, 'dst', dst)
-            if len(modes) == 0:
-                modes = [0, 0]
-            if len(modes) == 1:
-                modes.append(0)
             s0 = src0 if modes[0] == 1 else input[src0]
             s1 = src1 if modes[1] == 1 else input[src1]
             input[dst] = 1 if s0 == s1 else 0
@@ -121,5 +103,9 @@ with open('input.txt', 'r') as f:
     # print(input)
     # output = input[0]
     print('Done', output_param)
+
+    if output_param != 9006327:
+        print('Refactor error')
+        exit(1)
 
 
