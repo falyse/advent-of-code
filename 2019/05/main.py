@@ -9,8 +9,7 @@ def run_program(code, input_param):
     output_param = None
     while code[pc] != 99:
         cmd = code[pc]
-        op = int(str(cmd)[-2:])
-        modes = get_modes(str(cmd)[:-2])
+        op, modes = decode_cmd(cmd)
         # print('pc', pc, 'cmd', cmd, 'op', op, 'modes', modes)
 
         src0 = pc + 1 if modes[0] == 1 else code[pc + 1]
@@ -61,6 +60,14 @@ def run_program(code, input_param):
     return output_param
 
 
+def decode_cmd(cmd):
+    cmd = str(cmd)
+    op = int(cmd[-2:])
+    modes = get_modes(cmd[:-2])  # Other bits are parameter modes
+    # print(op, modes)
+    return op, modes
+
+
 def get_modes(p):
     modes = [int(x) for x in p]
     modes = list(reversed(modes))
@@ -70,6 +77,7 @@ def get_modes(p):
 
 
 def test():
+    assert decode_cmd(1002) == (2, [0, 1, 0])
     # position mode: input is equal to 8; output 1 (if it is) or 0 (if it is not)
     assert run_program([3,9,8,9,10,9,4,9,99,-1,8], 8) == 1
     assert run_program([3,9,8,9,10,9,4,9,99,-1,8], 0) == 0
@@ -103,6 +111,6 @@ with open('input.txt', 'r') as f:
 # with open('test.txt', 'r') as f:
 #     test()
     program_code = process_input(f.read())
-    run_program(program_code.copy(), 1)
-    run_program(program_code.copy(), 5)
+    run_program(program_code.copy(), 1)  # Part 1
+    run_program(program_code.copy(), 5)  # Part 2
 
