@@ -1,5 +1,5 @@
 def populate_grid(input):
-    """Process input directions to route the wire path to a 2-d grid dict
+    """Process input directions to route the wire path to a dict of points
        At each coordinate, store the number of steps taken so far"""
     grid = {}
     x0 = 0
@@ -43,11 +43,8 @@ def get_range(p0, p1):
 
 def set_point(grid, x, y, num_steps):
     """Set the grid value of the specified point to the passed number of steps"""
-    if x not in grid:
-        grid[x] = {}
-    if y not in grid[x]:
-        grid[x][y] = num_steps
-        # print('  ', x, y, 'steps', i)
+    if (x,y) not in grid:
+        grid[(x,y)] = num_steps
 
 
 def calc_dist(point):
@@ -66,22 +63,20 @@ with open('input.txt', 'r') as f:
     grid1 = populate_grid(w1_input)
     grid2 = populate_grid(w2_input)
 
+    # Crosses are points that exist in both grids
     crosses = []
-    for x in grid1.keys():
-        if x in grid2.keys():
-            for y in grid1[x].keys():
-                if y in grid2[x].keys():
-                    if grid1[x][y] and grid2[x][y]:
-                        if x != 0 and y != 0:
-                            crosses.append((x,y))
+    for point in grid1.keys():
+        if point in grid2.keys():
+            if point != (0,0):
+                crosses.append(point)
 
-    # Part 1: Mininum Manhattan distance to cross
+    # Part 1: Minimum Manhattan distance
     dists = [calc_dist(point) for point in crosses]
     print('Min distance', min(dists))
     assert min(dists) == 896
 
-    # Part 2: Minimum steps to cross
-    steps = [grid1[x][y] + grid2[x][y] for x,y in crosses]
+    # Part 2: Minimum steps
+    steps = [grid1[point] + grid2[point] for point in crosses]
     print('Min steps', min(steps))
     assert min(steps) == 16524
 

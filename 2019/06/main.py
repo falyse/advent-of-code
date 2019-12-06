@@ -91,6 +91,7 @@ with open('input.txt', 'r') as f:
     #   Sum all the depths to get the total number of orbits in the system
     num_orbits = tree.get_total_depth()
     print('Num orbits', num_orbits)
+    assert num_orbits == 271151
 
     # Part 2:
     #   The minimum number of transfers between YOU and SAN
@@ -100,9 +101,6 @@ with open('input.txt', 'r') as f:
     ancestor = find_common_ancestor(you, san)
     num_transfers = (you.depth - ancestor.depth - 1) + (san.depth - ancestor.depth - 1)
     print('Num transfers', num_transfers)
-
-    # Answer assertions for refactoring
-    assert num_orbits == 271151
     assert num_transfers == 388
 
 
