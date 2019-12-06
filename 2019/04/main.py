@@ -1,43 +1,38 @@
-range_min = 134792
-range_max = 675810
-
 def match(value):
-    if len(str(value)) != 6:
-        return False
-    if not has_double(value):
-        return False
-    if not increasing(value):
-        return False
-    return True
+    password = str(value)
+    return (len(password) == 6 and
+            has_double(password) and
+            increasing(password))
 
-def has_double(value):
-    last = None
-    for x in str(value):
-        if last != None and x == last:
-            if not (x + x + x) in str(value):
+
+def has_double(password):
+    last_char = None
+    for char in password:
+        if char == last_char:
+            if not (char + char + char) in password:  # Part 2
                 return True
-        last = x
+        last_char = char
     return False
 
-def increasing(value):
-    last = None
-    for x in str(value):
-        if last != None and int(x) < int(last):
+
+def increasing(password):
+    last_char = None
+    for x in password:
+        if last_char is not None and int(x) < int(last_char):
             return False
-        last = x
+        last_char = x
     return True
 
-# print(match(111111))
-# print(match(223450))
-# print(match(123789))
-print(match(112233))
-print(match(123444))
-print(match(111122))
+
+def test():
+    assert match(112233)
+    assert match(123444) is False
+    assert match(111122)
 
 
-cnt = 0
-for i in range(range_min, range_max):
-   if match(i):
-       cnt += 1
+test()
 
-print(cnt)
+input_range = range(134792, 675810)
+cnt = sum([match(x) for x in input_range])
+print('Num matches:', cnt)
+assert cnt == 1319
