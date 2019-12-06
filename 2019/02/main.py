@@ -7,19 +7,14 @@ def process_input(file_input):
 def run_program(code):
     pc = 0
     while code[pc] != 99:  # Halt
-        op = code[pc]
-        src0 = code[pc + 1]
-        src1 = code[pc + 2]
-        dst = code[pc + 3]
-        # print('pc', pc, 'op', op, 'src0', src0, 'src1', src1, 'dst', dst)
+        op, src0, src1, dst = code[pc:pc+4]
 
         if op == 1:  # Add
             code[dst] = code[src0] + code[src1]
-            pc += 4
         if op == 2:  # Multiply
             code[dst] = code[src0] * code[src1]
-            pc += 4
 
+        pc += 4
     return code
 
 

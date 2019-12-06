@@ -32,7 +32,7 @@ def test():
 
 test()
 
-input_range = range(134792, 675810)
+input_range = range(134792, 675810 + 1)
 cnt = sum([match(x) for x in input_range])
 print('Num matches:', cnt)
 assert cnt == 1319
