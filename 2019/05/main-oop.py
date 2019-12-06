@@ -1,5 +1,4 @@
 external_input = 5
-external_output = None
 
 
 def process_input(input):
@@ -12,23 +11,20 @@ def process_input(input):
 def run_program():
     global pc
     pc = 0
+    external_output = None
     while True:
         cmd = program[pc]
         instr = decode_instr(cmd)
+        print(instr)
         if isinstance(instr, Halt):
             break
 
         instr.run()
-        print(instr)
         pc = instr.update_pc(pc)
 
         if pc >= len(program):
             break
-    print('\nDone. Output =', external_output)
-
-    if external_output != 9006327:
-        print('Refactor error')
-        exit(1)
+    return external_output
 
 
 def decode_instr(cmd):
@@ -196,3 +192,5 @@ with open('input.txt', 'r') as f:
     input = process_input(f.read())
     program = input.copy()
     run_program()
+    print('Program output =', external_output)
+    assert external_output == 9006327
