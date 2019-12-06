@@ -7,7 +7,7 @@ def process_input(file_input):
 def run_program(code, input_param):
     pc = 0
     output_param = None
-    while code[pc] != 99:
+    while code[pc] != 99:  # Halt
         cmd = code[pc]
         op, modes = decode_cmd(cmd)
         # print('pc', pc, 'cmd', cmd, 'op', op, 'modes', modes)
@@ -17,8 +17,6 @@ def run_program(code, input_param):
         dst = code[pc + 3]
         # print('  src0', src0, 'src1', src1, 'dst', dst)
 
-        if op == 99: # Halt
-            break
         if op == 1:  # Add
             code[dst] = code[src0] + code[src1]
             pc += 4
@@ -49,14 +47,6 @@ def run_program(code, input_param):
             code[dst] = 1 if code[src0] == code[src1] else 0
             pc += 4
 
-        if pc >= len(code):
-            break
-    print('\nDone. Program input =', input_param, '-> output =', output_param)
-
-    if (input_param == 1 and output_param != 15508323 or
-        input_param == 5 and output_param != 9006327):
-        print('Refactor error')
-        exit(1)
     return output_param
 
 
@@ -107,10 +97,18 @@ def test():
     assert run_program(example, 9) == 1001
 
 
+test()
+
 with open('input.txt', 'r') as f:
-# with open('test.txt', 'r') as f:
-#     test()
     program_code = process_input(f.read())
-    run_program(program_code.copy(), 1)  # Part 1
-    run_program(program_code.copy(), 5)  # Part 2
+
+    # Part 1
+    output = run_program(program_code.copy(), 1)  # Part 1
+    print('Part 1 output =', output)
+    assert output == 15508323
+
+    # Part 2
+    output = run_program(program_code.copy(), 5)  # Part 2
+    print('Part 2 output =', output)
+    assert output == 9006327
 
