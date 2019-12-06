@@ -16,6 +16,12 @@ class Node:
         node.parent = self
         self.children.append(node)
 
+    def remove_child(self, node):
+        node.parent = None
+        self.children = self.children.remove(node)
+        if self.children is None:
+            self.children = []
+
     def get_total_depth(self):
         return self.depth + sum([x.get_total_depth() for x in self.children])
 
@@ -91,7 +97,6 @@ with open('input.txt', 'r') as f:
     #   Sum all the depths to get the total number of orbits in the system
     num_orbits = tree.get_total_depth()
     print('Num orbits', num_orbits)
-    assert num_orbits == 271151
 
     # Part 2:
     #   The minimum number of transfers between YOU and SAN
@@ -101,8 +106,13 @@ with open('input.txt', 'r') as f:
     ancestor = find_common_ancestor(you, san)
     num_transfers = (you.depth - ancestor.depth - 1) + (san.depth - ancestor.depth - 1)
     print('Num transfers', num_transfers)
+
+    # Part 3:
+    #   Execute the transfer from Part 2 in the tree
+    you.parent.remove_child(you)  # Remove from current location
+    san.parent.add_child(you)  # Add to new location
+    you.depth = san.depth
+    # print(tree)
+
+    assert num_orbits == 271151
     assert num_transfers == 388
-
-
-
-
