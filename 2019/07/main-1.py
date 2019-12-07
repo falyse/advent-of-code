@@ -6,7 +6,9 @@ def process_input(file_input):
     file_input = [int(x) for x in file_input]
     return file_input
 
+
 curr_inputs = {}
+input_available = [threading.Event() for _ in range(5)]
 
 def run_program(id, code, phase):
     global curr_inputs
@@ -35,10 +37,14 @@ def run_program(id, code, phase):
                 code[dst] = phase
                 # print('  amp input', id, phase)
             else:
-                while curr_inputs[id] is None:
-                    pass
+                # while curr_inputs[id] is None:
+                    # time.sleep(0.1)
+                    # pass
+                # print('  wait', id)
+                input_available[id].wait()
                 code[dst] = curr_inputs[id]
                 curr_inputs[id] = None
+                input_available[id].clear()
                 # print('  amp input', id, curr_inputs[id])
             input_i += 1
             pc += 2
@@ -46,9 +52,13 @@ def run_program(id, code, phase):
             output_param = code[src0]
             if id == 4:
                 curr_inputs[0] = output_param
+                # print('  set', 0)
+                input_available[0].set()
                 # print('  amp output', id, output_param)
             else:
                 curr_inputs[id+1] = output_param
+                # print('  set', id+1)
+                input_available[id+1].set()
                 # print('  amp output', id, output_param)
             pc += 2
         if op == 5:  # Jump if true
@@ -95,21 +105,17 @@ def run_amps(code, sequence):
     i = 0
     threads = list()
     for phase in sequence:
+        input_available[i].set()
         x = threading.Thread(target=run_program, args=(i, codes[i], phase))
         threads.append(x)
-        print('thread %d start' % i)
         x.start()
         i += 1
 
     for index, thread in enumerate(threads):
-        print('thread %d wait' % index)
         thread.join()
-        print('thread %d done' % index)
 
     output = curr_inputs[0]
-    print('out', output)
     return output
-
 
 
 def test():
@@ -125,11 +131,14 @@ with open('input.txt', 'r') as f:
     # perms = permutations(range(0,5))
     perms = permutations(range(5,10))
     max = 0
+    stop_loop = 0
     for p in perms:
         print(p)
         value = run_amps(program_code.copy(), list(p))
         if value > max:
             max = value
+        print('  output', value, 'max', max)
     print('max', max)
+    assert max == 69816958
 
 # Not 43520
