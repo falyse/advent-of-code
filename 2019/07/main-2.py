@@ -1,17 +1,32 @@
 from itertools import permutations
 import threading
 
+
 def process_input(file_input):
     file_input = file_input.split(',')
     file_input = [int(x) for x in file_input]
     return file_input
 
-curr_inputs = {}
 
-def run_program(id, code, phase):
-    global curr_inputs
+class InputSignal:
+    def __init__(self):
+        self.ready = threading.Event()
+        self.ready.set()
+        self.value = None
+
+    def set_value(self, value):
+        self.value = value
+        self.ready.set()
+
+    def get_value(self):
+        self.ready.wait()
+        self.ready.clear()
+        return self.value
+
+
+def run_program(code, id, phase, input_signals):
     pc = 0
-    input_i = 0
+    first_input = True
     output_param = None
     while code[pc] != 99:  # Halt
         cmd = code[pc]
@@ -20,7 +35,7 @@ def run_program(id, code, phase):
 
         src0 = pc + 1 if modes[0] == 1 else code[pc + 1]
         src1 = pc + 2 if modes[1] == 1 else code[pc + 2]
-        dst = code[pc + 3]
+        dst = code[pc + 3] if pc + 3 < len(code) else None
         # print('  src0', src0, 'src1', src1, 'dst', dst)
 
         if op == 1:  # Add
@@ -31,25 +46,19 @@ def run_program(id, code, phase):
             pc += 4
         if op == 3:  # Input
             dst = code[pc + 1]
-            if input_i == 0:
+            # For the first input, use the phase
+            # Otherwise, get the current input signal value for this amplifier (waiting if necessary)
+            if first_input:
                 code[dst] = phase
-                # print('  amp input', id, phase)
+                first_input = False
             else:
-                while curr_inputs[id] is None:
-                    pass
-                code[dst] = curr_inputs[id]
-                curr_inputs[id] = None
-                # print('  amp input', id, curr_inputs[id])
-            input_i += 1
+                code[dst] = input_signals[id].get_value()
             pc += 2
         if op == 4:  # Output
             output_param = code[src0]
-            if id == 4:
-                curr_inputs[0] = output_param
-                # print('  amp output', id, output_param)
-            else:
-                curr_inputs[id+1] = output_param
-                # print('  amp output', id, output_param)
+            # Set the next amplifier's input signal to this output value
+            out_id = 0 if id == 4 else id + 1
+            input_signals[out_id].set_value(output_param)
             pc += 2
         if op == 5:  # Jump if true
             if code[src0]:
@@ -88,28 +97,19 @@ def get_modes(p):
 
 
 def run_amps(code, sequence):
-    global curr_inputs
-    curr_inputs = {0: 0, 1: None, 2: None, 3: None, 4: None}
-    # while True:
-    codes = [code.copy() for _ in range(0,5)]
-    i = 0
-    threads = list()
-    for phase in sequence:
-        x = threading.Thread(target=run_program, args=(i, codes[i], phase))
+    # Create a shared list of input signals
+    input_signals = [InputSignal() for _ in range(len(sequence))]
+    input_signals[0].set_value(0)  # Send 0 to first amplifier once
+    # Start a thread to run the code on each amplifier in parallel
+    threads = []
+    for id, phase in enumerate(sequence):
+        x = threading.Thread(target=run_program, args=(code.copy(), id, phase, input_signals))
         threads.append(x)
-        print('thread %d start' % i)
         x.start()
-        i += 1
-
-    for index, thread in enumerate(threads):
-        print('thread %d wait' % index)
+    # Wait for all threads to finish
+    for thread in threads:
         thread.join()
-        print('thread %d done' % index)
-
-    output = curr_inputs[0]
-    print('out', output)
-    return output
-
+    return input_signals[0].get_value()
 
 
 def test():
@@ -119,10 +119,8 @@ def test():
 
 with open('input.txt', 'r') as f:
     program_code = process_input(f.read())
-    # test(program_code)
-    # exit(1)
+    # test()
 
-    # perms = permutations(range(0,5))
     perms = permutations(range(5,10))
     max = 0
     for p in perms:
@@ -130,6 +128,6 @@ with open('input.txt', 'r') as f:
         value = run_amps(program_code.copy(), list(p))
         if value > max:
             max = value
-    print('max', max)
-
-# Not 43520
+        print('  output', value, 'max', max)
+    print('Max value:', max)
+    assert max == 69816958
