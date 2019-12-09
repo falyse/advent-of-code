@@ -17,8 +17,8 @@ def run_program(code, input_param):
     code = init_memory(code)
     debug = []
     while code[pc] != 99:  # Halt
-        cmd = code[pc]
         print('pc', pc, ':', code[pc:pc+4])
+        cmd = code[pc]
         op, modes = decode_cmd(cmd)
         # print('pc', pc, 'cmd', cmd, ': op', op, 'modes', modes)
 
@@ -116,7 +116,7 @@ def test():
     assert run_program([103,1985,109,2000,109,19,204,-34,99], 555) == 555
 
 
-test()
+# test()
 
 with open('input.txt', 'r') as f:
     program_code = process_input(f.read())
@@ -126,7 +126,7 @@ with open('input.txt', 'r') as f:
     print('Part 1 output =', output)
     assert output == 3512778005
 
-    # Part 1
+    # Part 2
     output = run_program(program_code.copy(), 2)
     print('Part 2 output =', output)
     assert output == 35920
