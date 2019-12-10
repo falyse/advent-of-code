@@ -16,7 +16,7 @@ match = util.make_grid(10, 10, fill='.')
 def vaporize_grid(grid, start_coords):
     x, y = start_coords
     coords = []
-    combos = get_combos(len(line))
+    combos = get_combos(len(grid[0]))
     for dx,dy in combos:
         coord = search_path(grid, x, y, dx, dy)
         if coord is not None:
@@ -85,9 +85,9 @@ def search_path(grid, x, y, delta_x, delta_y):
     while True:
         x += delta_x
         y += delta_y
-        if x < 0 or x >= len(line):
+        if x < 0 or x >= len(grid[0]):
             break
-        if y < 0 or y >= len(line):
+        if y < 0 or y >= len(grid[0]):
             break
         if grid[y][x]:
             if debug and x == 11:
@@ -124,27 +124,15 @@ r'''.#..#
 
 
 def find_station_location(text):
-    grid = util.text_to_grid(text)
-    grid = util.grid_map(grid, {'#': True, '.': False})
+    grid = util.text_to_grid(text, map={'#': True, '.': False})
     print(grid)
 
 
-# test()
+test()
 
 with open('input.txt', 'r') as f:
 # with open('test-4.txt', 'r') as f:
-#     input = [x.strip() for x in f.readlines()]
-#     print(input)
-#     x_size = len(input[0])
-#     y_size = len(input)
-#     size = max(x_size, y_size)
-#     grid = util.make_grid(size, size, fill=False)
-#     for y,line in enumerate(input):
-#         for x,char in enumerate(line):
-#             grid[y][x] = char != '.'
-    grid = util.text_to_grid(f.read())
-    grid = util.grid_map(grid, {'#': True, '.': False})
-    line = grid[0]
+    grid = util.text_to_grid(f.read(), map={'#': True, '.': False})
 
     counts,max_coords, max_count,coords = process_grid(grid)
     print('Max', max_count, 'at', max_coords, 'coords', coords)

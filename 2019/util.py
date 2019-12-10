@@ -38,10 +38,15 @@ def lmap(func, *iterables):
 
 
 # Grid
-def text_to_grid(text):
-    return [[x for x in line.strip()] for line in text.split('\n')]
+def text_to_grid(text, map):
+    grid = [[x for x in line.strip()] for line in text.split('\n')]
+    if map.keys():
+        grid = grid_map(grid, map)
+    return grid
 
-def grid_to_text(grid):
+def grid_to_text(grid, map):
+    if map.keys():
+        grid = grid_map(grid, map)
     return '\n'.join([''.join([x for x in line]) for line in grid])
 
 def grid_map(grid, map={}):
