@@ -164,7 +164,8 @@ def find_station_location(text):
     for a in asteroids:
         if best_a is None or a.get_num_visible() > best_a.get_num_visible():
             best_a = a
-    return best_a.coords, best_a.get_num_visible()
+    # return best_a.coords, best_a.get_num_visible()
+    return best_a
 
 
 def test():
@@ -174,15 +175,17 @@ def test():
     assert get_angle((-1,0)) == 270
     assert get_angle((1,-1)) == 45
 
-    assert find_station_location(r"""
+    a = find_station_location(r"""
         .#..#
         .....
         #####
         ....#
         ...##
-        """) == ((3, 4), 8)
+        """)
+    assert a.coords == (3, 4)
+    assert a.get_num_visible() == 8
 
-    assert find_station_location(r"""
+    a = find_station_location(r"""
         ......#.#.
         #..#.#....
         ..#######.
@@ -193,9 +196,11 @@ def test():
         .##.#..###
         ##...#..#.
         .#....####
-        """) == ((5, 8), 33)
+        """)
+    assert a.coords == (5, 8)
+    assert a.get_num_visible() == 33
 
-    assert find_station_location(r"""
+    a = find_station_location(r"""
         #.#...#.#.
         .###....#.
         .#....#...
@@ -206,9 +211,11 @@ def test():
         ..##....##
         ......#...
         .####.###.
-        """) == ((1, 2), 35)
+        """)
+    assert a.coords == (1, 2)
+    assert a.get_num_visible() == 35
 
-    assert find_station_location(r"""
+    a = find_station_location(r"""
         .#..#..###
         ####.###.#
         ....###.#.
@@ -219,9 +226,11 @@ def test():
         #..#.#.###
         .##...##.#
         .....#.#..
-        """) == ((6, 3), 41)
+        """)
+    assert a.coords == (6, 3)
+    assert a.get_num_visible() == 41
 
-    assert find_station_location(r"""
+    a = find_station_location(r"""
         .#..##.###...#######
         ##.############..##.
         .#.######.########.#
@@ -242,18 +251,19 @@ def test():
         .#.#.###########.###
         #.#.#.#####.####.###
         ###.##.####.##.#..##
-        """) == ((11, 13), 210)
+        """)
+    assert a.coords == (11, 13)
+    assert a.get_num_visible() == 210
 
 
 test()
 
 with open('input.txt', 'r') as f:
-# with open('test-4.txt', 'r') as f:
-    grid = util.text_to_grid(f.read(), map={'#': True, '.': False})
-
-    counts,max_coords, max_count,coords = process_grid(grid)
-    print('Max', max_count, 'at', max_coords, 'coords', coords)
-    assert max_count == 326
+    # Part 1
+    asteroid = find_station_location(f.read())
+    max_visible = asteroid.get_num_visible()
+    print('Max', max_visible, 'at', asteroid.coords)
+    assert max_visible == 326
 
     # Part 2
     step_max = 200
