@@ -4,51 +4,6 @@ import util
 
 from itertools import permutations
 import math
-import copy
-
-
-class Asteroid:
-    def __init__(self, coords):
-        self.coords = coords
-        self.visible = []
-
-    def __str__(self):
-        return 'Asteroid at ' + str(self.coords)
-
-    def set_path(self, dist, angle):
-        self.dist = dist
-        self.angle = angle
-
-    def update_visible(self, others):
-        self.visible = []
-        all = []
-        all_angles = set()
-        # First, calculate the paths to all other asteroids
-        for o in others:
-            if o != self:
-                dist, angle = self.get_path(self.coords, o.coords)
-                oc = copy.copy(o)
-                oc.set_path(dist, angle)
-                all.append(oc)
-                all_angles.add(angle)
-        # Then, discard any asteroid that is not the closest in its path
-        for angle in all_angles:
-            matching = [a for a in all if a.angle == angle]
-            min_match, _ = util.attribute_min_max(matching, 'angle')
-            print('  can see', min_match, '(angle %0.2f)' % angle)
-            self.visible.append(min_match)
-
-    def get_path(self, coord0, coord1):
-        dx = coord1[0] - coord0[0]
-        dy = coord1[1] - coord0[1]
-        dist = dx^2 + dy^2
-        angle = math.atan2(-1*dy, dx) * 180/math.pi
-        angle = (90 - angle) % 360  # Convert to clockwise angle
-        return dist, angle
-
-    def get_num_visible(self):
-        return len(self.visible)
-
 
 def render(grid):
     for line in grid:
@@ -151,22 +106,6 @@ def get_angle(coord):
     return angle
 
 
-def find_station_location(text):
-    asteroids = []
-    for y, line in enumerate(text.strip().splitlines()):
-        for x, char in enumerate(line.strip()):
-            if char == '#':
-                asteroids.append(Asteroid((x,y)))
-    for a in asteroids:
-        print(a)
-        a.update_visible(asteroids)
-    best_a = None
-    for a in asteroids:
-        if best_a is None or a.get_num_visible() > best_a.get_num_visible():
-            best_a = a
-    return best_a.coords, best_a.get_num_visible()
-
-
 def test():
     assert get_angle((0,-1)) == 0
     assert get_angle((1,0)) == 90
@@ -174,78 +113,22 @@ def test():
     assert get_angle((-1,0)) == 270
     assert get_angle((1,-1)) == 45
 
-    assert find_station_location(r"""
-        .#..#
-        .....
-        #####
-        ....#
-        ...##
-        """) == ((3, 4), 8)
-
-    assert find_station_location(r"""
-        ......#.#.
-        #..#.#....
-        ..#######.
-        .#.#.###..
-        .#..#.....
-        ..#....#.#
-        #..#....#.
-        .##.#..###
-        ##...#..#.
-        .#....####
-        """) == ((5, 8), 33)
-
-    assert find_station_location(r"""
-        #.#...#.#.
-        .###....#.
-        .#....#...
-        ##.#.#.#.#
-        ....#.#.#.
-        .##..###.#
-        ..#...##..
-        ..##....##
-        ......#...
-        .####.###.
-        """) == ((1, 2), 35)
-
-    assert find_station_location(r"""
-        .#..#..###
-        ####.###.#
-        ....###.#.
-        ..###.##.#
-        ##.##.#.#.
-        ....###..#
-        ..#.#..#.#
-        #..#.#.###
-        .##...##.#
-        .....#.#..
-        """) == ((6, 3), 41)
-
-    assert find_station_location(r"""
-        .#..##.###...#######
-        ##.############..##.
-        .#.######.########.#
-        .###.#######.####.#.
-        #####.##.#.##.###.##
-        ..#####..#.#########
-        ####################
-        #.####....###.#.#.##
-        ##.#################
-        #####.##.###..####..
-        ..######..##.#######
-        ####.##.####...##..#
-        .#####..#.######.###
-        ##...#.##########...
-        #.##########.#######
-        .####.#.###.###.#.##
-        ....##.##.###..#####
-        .#.#.###########.###
-        #.#.#.#####.####.###
-        ###.##.####.##.#..##
-        """) == ((11, 13), 210)
+    assert find_station_location(
+r'''.#..#
+.....
+#####
+....#
+...##
+''') == ((3,4), 8)
+    exit(0)
 
 
-test()
+def find_station_location(text):
+    grid = util.text_to_grid(text, map={'#': True, '.': False})
+    print(grid)
+
+
+# test()
 
 with open('input.txt', 'r') as f:
 # with open('test-4.txt', 'r') as f:

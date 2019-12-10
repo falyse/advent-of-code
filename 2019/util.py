@@ -1,5 +1,6 @@
 import re
 import typing
+from operator import attrgetter
 
 
 # Extract types
@@ -36,6 +37,8 @@ def list_element_delta(x):
 def lmap(func, *iterables):
     return list(map(func, *iterables))
 
+def attribute_min_max(values, attribute):
+    return min(values, key=attrgetter(attribute)), max(values, key=attrgetter(attribute))
 
 # Grid
 def text_to_grid(text, map):
@@ -49,9 +52,11 @@ def grid_to_text(grid, map):
         grid = grid_map(grid, map)
     return '\n'.join([''.join([x for x in line]) for line in grid])
 
+def grid_min_max(grid):
+    return min(map(min, grid)), max(map(max, grid))
+
 def grid_map(grid, map={}):
     return [[map[x] if x in map.keys() else x for x in y] for y in grid]
-
 
 def make_grid(*dimensions: typing.List[int], fill=None):
     """Returns a grid such that 'dimensions' is just out of bounds"""
