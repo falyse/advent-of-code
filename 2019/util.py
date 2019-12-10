@@ -38,6 +38,16 @@ def lmap(func, *iterables):
 
 
 # Grid
+def text_to_grid(text):
+    return [[x for x in line.strip()] for line in text.split('\n')]
+
+def grid_to_text(grid):
+    return '\n'.join([''.join([x for x in line]) for line in grid])
+
+def grid_map(grid, map={}):
+    return [[map[x] if x in map.keys() else x for x in y] for y in grid]
+
+
 def make_grid(*dimensions: typing.List[int], fill=None):
     """Returns a grid such that 'dimensions' is just out of bounds"""
     if len(dimensions) == 1:

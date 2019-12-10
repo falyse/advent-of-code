@@ -39,8 +39,6 @@ def process_grid(grid):
                     coord = search_path(grid, x, y, dx, dy)
                     if coord is not None:
                         cnt += 1
-                        if x == 11 and y == 13:
-                            print('asdf1', coord)
                         coords.append(coord)
                 cnts[y][x] = cnt
                 if cnt > max:
@@ -93,7 +91,7 @@ def search_path(grid, x, y, delta_x, delta_y):
             break
         if grid[y][x]:
             if debug and x == 11:
-                print('  search path', delta_x, delta_y, 'found',  x, y, 'input', input[y][x], 'angle', get_angle((delta_x, delta_y)))
+                print('  search path', delta_x, delta_y, 'found',  x, y, 'angle', get_angle((delta_x, delta_y)))
                 # print(x,y)
                 # match[y][x] = '#'
             # print('    found', x, y)
@@ -107,28 +105,46 @@ def get_angle(coord):
     angle = (90 - angle) % 360
     return angle
 
+
 def test():
     assert get_angle((0,-1)) == 0
     assert get_angle((1,0)) == 90
     assert get_angle((0,1)) == 180
     assert get_angle((-1,0)) == 270
     assert get_angle((1,-1)) == 45
-    # exit(0)
+
+    assert find_station_location(
+r'''.#..#
+.....
+#####
+....#
+...##
+''') == ((3,4), 8)
+    exit(0)
 
 
-test()
+def find_station_location(text):
+    grid = util.text_to_grid(text)
+    grid = util.grid_map(grid, {'#': True, '.': False})
+    print(grid)
+
+
+# test()
 
 with open('input.txt', 'r') as f:
 # with open('test-4.txt', 'r') as f:
-    input = [x.strip() for x in f.readlines()]
-    print(input)
-    x_size = len(input[0])
-    y_size = len(input)
-    size = max(x_size, y_size)
-    grid = util.make_grid(size, size, fill=False)
-    for y,line in enumerate(input):
-        for x,char in enumerate(line):
-            grid[y][x] = char != '.'
+#     input = [x.strip() for x in f.readlines()]
+#     print(input)
+#     x_size = len(input[0])
+#     y_size = len(input)
+#     size = max(x_size, y_size)
+#     grid = util.make_grid(size, size, fill=False)
+#     for y,line in enumerate(input):
+#         for x,char in enumerate(line):
+#             grid[y][x] = char != '.'
+    grid = util.text_to_grid(f.read())
+    grid = util.grid_map(grid, {'#': True, '.': False})
+    line = grid[0]
 
     counts,max_coords, max_count,coords = process_grid(grid)
     print('Max', max_count, 'at', max_coords, 'coords', coords)
@@ -136,7 +152,6 @@ with open('input.txt', 'r') as f:
 
     # Part 2
     step_max = 200
-    # step_max = 18+9+9
     step = 0
     while True:
         sorted_coords = []
