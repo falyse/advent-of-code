@@ -6,12 +6,12 @@ import util
 import threading
 
 grid = {}
-grid[0] = {0: 0}
+grid[0] = {0: 1}
 rx = 0
 ry = 0
 dir = 0
 rnum = 1
-input_param = 0
+# input_param = 0
 
 def init_memory(code):
     for _ in range(2000):
@@ -59,14 +59,15 @@ def run_program(code):
             dst = code[pc + 1]
             if modes[0]:
                 dst += relative_base
+            input_param = grid[rx][ry]
             code[dst] = input_param
-            print(' input', input_param)
+            # print(' input', input_param)
             debug.append('code[%d] = input' % dst)
             debug.append('%d = %d' % (code[dst], input_param))
             pc += 2
         if op == 4:  # Output
             output_params.append(code[src0])
-            print(' output', code[src0])
+            # print(' output', code[src0])
             debug.append('output = code[%d]' % src0)
             debug.append('output = %d' % output_params[-1])
             output_index += 1
@@ -151,11 +152,12 @@ def run_robot(outputs):
     global rx
     global ry
     global dir
-    global input_param
-    input_param = grid[rx][ry]
+    # global input_param
+    # input_param = grid[rx][ry]
     color = outputs[0]
     next_dir = outputs[1]
-    print('x,y', rx, ry, 'orig', grid[rx][ry], 'new', color, 'rnum', rnum)
+    if rx == 36:
+        print('x,y', rx, ry, 'orig', grid[rx][ry], 'new', color, 'rnum', rnum)
     grid[rx][ry] = color
     # print('x,y', rx, ry, 'color', grid[rx][ry], 'rnum', rnum)
     if next_dir == 0:
@@ -166,7 +168,7 @@ def run_robot(outputs):
         dir += 360
     if dir > 180:
         dir -= 360
-    print('  dir', dir)
+    # print('  dir', dir)
     if dir == 0:
         ry += 1
     elif dir == 90:
@@ -201,7 +203,45 @@ with open('input.txt', 'r') as f:
     run_program(program_code)
     print('Final rnum', rnum)
 
+    min_x = 0
+    max_x = 0
+    min_y = 0
+    max_y = 0
+    min_x, max_x = util.min_max(grid.keys())
+    for row in grid.keys():
+        a, b = util.min_max(grid[row].keys())
+        if a < min_y:
+            min_y = a
+        if b > max_y:
+            max_y = b
+
+    # for ix in range(max_x):
+    #     if len(grid[ix]) < min_y:
+    #         min_y = len(grid[ix])
+    #     if len(grid[ix]) > max_y:
+    #         max_y = len(grid[ix])
+    print('maxes', min_x, max_x, min_y, max_y)
+    temp = util.make_grid(abs(min_y), max_x, fill = ' ')
+    for ix in range(min_x, max_x+1):
+        # for iy in range(max_y+2, min_y-1, -1):
+        for iy in range(0, -6, -1):
+            print('ix', ix, 'iy', iy)
+            # if ix in grid.keys() and iy in grid[ix].keys():
+            #     print('here')
+            #     temp[iy][ix] = '#'
+            # else:
+            #     temp[iy][ix] = '#'
+            try:
+                if grid[ix][iy] == 1:
+
+                    temp[abs(iy)][ix] = '#'
+                # print('asdf', ix, iy)
+            except:
+                pass
+    print(util.grid_to_text(temp, map={}))
+
 # not 6
 # not 7
 # not 39
 
+# not main.py URCAFLCY
