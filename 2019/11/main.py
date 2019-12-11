@@ -12,11 +12,12 @@ def init_memory(code):
     return code
 
 
-def run_program(code):
+def run_program(code, input_param):
     pc = 0
     relative_base = 0
     output_params = []
     output_index = 0
+    input_index = 0
     code = init_memory(code)
     debug = []
     while code[pc] != 99:  # Halt
@@ -102,27 +103,6 @@ def run_program(code):
     return output_params
 
 
-
-class InputSignal:
-    def __init__(self):
-        self.ready = threading.Event()
-        self.ready.set()
-        self.value = None
-
-    def set_value(self, value):
-        self.value = value
-        self.ready.set()
-
-    def get_value(self):
-        self.ready.wait()
-        self.ready.clear()
-        return self.value
-
-    def peek_value(self):
-        return self.value
-
-
-
 def decode_cmd(cmd):
     cmd = str(cmd)
     op = int(cmd[-2:])
@@ -147,8 +127,6 @@ def run_robot(outputs):
     global dir
     color = outputs[0]
     next_dir = outputs[1]
-    if rx == 36:
-        print('x,y', rx, ry, 'orig', grid[rx][ry], 'new', color, 'rnum', rnum)
     grid[rx][ry] = color
     if next_dir == 0:
         dir -= 90
@@ -207,13 +185,13 @@ with open('input.txt', 'r') as f:
 
     # Part 1
     reset(0)
-    run_program(program_code)
+    run_program(program_code, 0)
     print('Final rnum', rnum)
     assert rnum == 2088
 
     # Part 2
     reset(1)
-    run_program(program_code)
+    run_program(program_code, 1)
 
     min_x = 0
     max_x = 0

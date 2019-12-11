@@ -1,16 +1,24 @@
+from collections import deque
+
+
 class IntcodeComputer:
     def __init__(self, debug=False):
         self.debug = debug
 
-    def initialize(self, program):
+    def initialize(self, program, inputs):
         self.pc = 0
         self.relative_base = 0
         self.mem = program.copy()
-        self.mem.extend([0 for _ in range(2000)])
-        self.output = None
+        self.mem += [0] * 10000
+        self.inputs = inputs
+        self.outputs = []
 
-    def run(self, program, input=0):
-        self.initialize(program)
+    def run(self, program, inputs):
+        self.initialize(program, inputs)
+        self.execute()
+        return self.outputs[0]
+
+    def execute(self):
         trace = []
         while self.mem[self.pc] != 99:  # Halt
             if self.debug:
@@ -43,17 +51,21 @@ class IntcodeComputer:
                 trace.append('%d = %d * %d' % (self.mem[dst], self.mem[src0], self.mem[src1]))
                 self.pc += 4
             if op == 3:  # Input
+                print('asdf input', self.inputs)
+                if len(self.inputs) <= 0:
+                    return False
+                input_value = self.inputs.popleft()
                 dst = self.mem[self.pc + 1]
                 if modes[0]:
                     dst += self.relative_base
-                self.mem[dst] = input
+                self.mem[dst] = input_value
                 trace.append('mem[%d] = input' % dst)
-                trace.append('%d = %d' % (self.mem[dst], input))
+                trace.append('%d = %d' % (self.mem[dst], input_value))
                 self.pc += 2
             if op == 4:  # Output
-                self.output = self.mem[src0]
+                self.outputs.append(self.mem[src0])
                 trace.append('output = mem[%d]' % src0)
-                trace.append('output = %d' % self.output)
+                trace.append('output = %d' % self.outputs[-1])
                 self.pc += 2
             if op == 5:  # Jump if true
                 if self.mem[src0]:
@@ -87,7 +99,7 @@ class IntcodeComputer:
 
             if self.debug:
                 print('  ', '\n   '.join(trace[-2:]))
-        return self.output
+        return True
 
     def get_mem(self, size=None):
         if size:
