@@ -10,13 +10,19 @@ class IntcodeComputer:
         self.relative_base = 0
         self.mem = program.copy()
         self.mem += [0] * 10000
-        self.inputs = inputs
+        if type(inputs) == int:
+            self.inputs = deque([inputs])
+        else:
+            self.inputs = inputs
         self.outputs = []
 
-    def run(self, program, inputs):
+    def run(self, program, inputs=deque()):
         self.initialize(program, inputs)
         self.execute()
-        return self.outputs[0]
+        if len(self.outputs):
+            return self.outputs[0]
+        else:
+            return self.mem[0]
 
     def execute(self):
         trace = []
@@ -119,3 +125,6 @@ class IntcodeComputer:
         while len(modes) < 3:
             modes.append(0)
         return modes
+
+    def reset_outputs(self):
+        self.outputs = []
