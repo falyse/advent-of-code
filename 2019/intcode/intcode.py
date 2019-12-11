@@ -51,7 +51,6 @@ class IntcodeComputer:
                 trace.append('%d = %d * %d' % (self.mem[dst], self.mem[src0], self.mem[src1]))
                 self.pc += 4
             if op == 3:  # Input
-                print('asdf input', self.inputs)
                 if len(self.inputs) <= 0:
                     return False
                 input_value = self.inputs.popleft()

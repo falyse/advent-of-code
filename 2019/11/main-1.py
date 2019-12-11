@@ -63,17 +63,31 @@ def reset(first_color):
 
 
 
+
+
 def test():
     pass
 
 
 test()
 
+
+def get_next_dir(dir, turn):
+    if turn:
+        dir += 1
+    else:
+        dir -= 1
+    if dir > 3:
+        dir = 0
+    if dir < 0:
+        dir = 3
+    return dir
+
+
 with open('input.txt', 'r') as f:
     program_code = [int(x) for x in f.read().split(',')]
     computer = IntcodeComputer(debug=False)
 
-    dirs = [x for x in range(4)]
     moves = {0: (0,1),
              1: (1,0),
              2: (0,-1),
@@ -87,25 +101,18 @@ with open('input.txt', 'r') as f:
     x = y = 0
     dir = 0
     while not done:
+        if (x,y) not in panels:
+            panels[(x,y)] = 0
         inputs.append(panels[(x,y)])
         done = computer.execute()
         color, turn = computer.outputs[-2:]
         panels[(x,y)] = color
-        print('asdf0 dir', dir, 'turn', turn)
-        if turn:
-            dir += 1
-        else:
-            dir -= 1
-        if dir > 3:
-            dir = 0
-        if dir < 0:
-            dir = 3
+        dir = get_next_dir(dir, turn)
         deltas = moves[dir]
-        print('asdf1 dir', dir, 'detlas', deltas, 'x', x, 'y', y)
         x,y = tuple(map(operator.add, (x,y), deltas))
-        print('asdf2 x', x, 'y', y)
-    print('Final rnum', rnum)
-    assert rnum == 2088
+    num_panels = len(panels)
+    print('Num panels:', num_panels)
+    assert num_panels == 2088
 
     exit(0)
     # Part 2
