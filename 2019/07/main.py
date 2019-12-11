@@ -42,11 +42,24 @@ with open('input.txt', 'r') as f:
     program_code = [int(x) for x in f.read().split(',')]
     # test()
 
+    # Part 1
+    perms = permutations(range(5))
+    max = 0
+    for p in perms:
+        print(p)
+        value = run_amps(program_code, list(p))
+        if value > max:
+            max = value
+        print('  output', value, 'max', max)
+    print('Max value:', max)
+    assert max == 21760
+
+    # Part 2
     perms = permutations(range(5,10))
     max = 0
     for p in perms:
         print(p)
-        value = run_amps(program_code.copy(), list(p))
+        value = run_amps(program_code, list(p))
         if value > max:
             max = value
         print('  output', value, 'max', max)
