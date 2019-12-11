@@ -5,13 +5,6 @@ from intcode import IntcodeComputer
 import util
 import threading
 
-grid = {}
-grid[0] = {0: 1}
-rx = 0
-ry = 0
-dir = 0
-rnum = 1
-# input_param = 0
 
 def init_memory(code):
     for _ in range(2000):
@@ -188,6 +181,22 @@ def run_robot(outputs):
     return grid[rx][ry]
 
 
+def reset(first_color):
+    global grid
+    global rx
+    global ry
+    global dir
+    global rnum
+
+    grid = {}
+    grid[0] = {}
+    grid[0][0] = first_color
+
+    rx = 0
+    ry = 0
+    dir = 0
+    rnum = 1
+
 
 
 def test():
@@ -200,8 +209,15 @@ with open('input.txt', 'r') as f:
     # with open('test.txt', 'r') as f:
     program_code = [int(x) for x in f.read().split(',')]
 
+    # Part 1
+    reset(0)
     run_program(program_code)
     print('Final rnum', rnum)
+    assert rnum == 2088
+
+    # Part 2
+    reset(1)
+    run_program(program_code)
 
     min_x = 0
     max_x = 0
@@ -238,7 +254,14 @@ with open('input.txt', 'r') as f:
                 # print('asdf', ix, iy)
             except:
                 pass
-    print(util.grid_to_text(temp, map={}))
+    render = util.grid_to_text(temp, map={})
+    print(render)
+    assert render == '\n'.join([
+        ' #  # ###   ##   ##  #### #     ##  ###   ',
+        ' #  # #  # #  # #  # #    #    #  # #  #  ',
+        ' #  # #  # #    #  # ###  #    #    #  #  ',
+        ' #  # ###  #    #### #    #    #    ###   ',
+        ' #  # # #  #  # #  # #    #    #  # #     '])
 
 # not 6
 # not 7
