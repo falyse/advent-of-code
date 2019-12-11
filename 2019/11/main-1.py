@@ -96,20 +96,20 @@ with open('input.txt', 'r') as f:
     # Part 1
     inputs = deque()
     computer.initialize(program_code, inputs)
-    panels = {(0, 0): 0}
-    done = False
-    x = y = 0
+    panels = {}
+    loc = (0,0)
     dir = 0
+    done = False
     while not done:
-        if (x,y) not in panels:
-            panels[(x,y)] = 0
-        inputs.append(panels[(x,y)])
+        if loc not in panels:
+            panels[loc] = 0
+        inputs.append(panels[loc])
         done = computer.execute()
         color, turn = computer.outputs[-2:]
-        panels[(x,y)] = color
+        panels[loc] = color
         dir = get_next_dir(dir, turn)
         deltas = moves[dir]
-        x,y = tuple(map(operator.add, (x,y), deltas))
+        loc = tuple(map(operator.add, loc, deltas))
     num_panels = len(panels)
     print('Num panels:', num_panels)
     assert num_panels == 2088
