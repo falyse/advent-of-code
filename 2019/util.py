@@ -2,6 +2,9 @@ import re
 import typing
 from operator import attrgetter
 
+PIXEL_BLACK = '█'
+PIXEL_LIGHT = '░'
+PIXEL_WHITE = ' '
 
 # Extract types
 def ints(s: str) -> typing.List[int]:
