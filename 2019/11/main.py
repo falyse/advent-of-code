@@ -145,14 +145,11 @@ def run_robot(outputs):
     global rx
     global ry
     global dir
-    # global input_param
-    # input_param = grid[rx][ry]
     color = outputs[0]
     next_dir = outputs[1]
     if rx == 36:
         print('x,y', rx, ry, 'orig', grid[rx][ry], 'new', color, 'rnum', rnum)
     grid[rx][ry] = color
-    # print('x,y', rx, ry, 'color', grid[rx][ry], 'rnum', rnum)
     if next_dir == 0:
         dir -= 90
     else:
@@ -206,7 +203,6 @@ def test():
 test()
 
 with open('input.txt', 'r') as f:
-    # with open('test.txt', 'r') as f:
     program_code = [int(x) for x in f.read().split(',')]
 
     # Part 1
@@ -231,27 +227,14 @@ with open('input.txt', 'r') as f:
         if b > max_y:
             max_y = b
 
-    # for ix in range(max_x):
-    #     if len(grid[ix]) < min_y:
-    #         min_y = len(grid[ix])
-    #     if len(grid[ix]) > max_y:
-    #         max_y = len(grid[ix])
     print('maxes', min_x, max_x, min_y, max_y)
-    temp = util.make_grid(abs(min_y), max_x, fill = ' ')
+    temp = util.make_grid(abs(min_y)+1, max_x, fill = ' ')
     for ix in range(min_x, max_x+1):
         # for iy in range(max_y+2, min_y-1, -1):
         for iy in range(0, -6, -1):
-            print('ix', ix, 'iy', iy)
-            # if ix in grid.keys() and iy in grid[ix].keys():
-            #     print('here')
-            #     temp[iy][ix] = '#'
-            # else:
-            #     temp[iy][ix] = '#'
             try:
                 if grid[ix][iy] == 1:
-
                     temp[abs(iy)][ix] = '#'
-                # print('asdf', ix, iy)
             except:
                 pass
     render = util.grid_to_text(temp, map={})
@@ -261,10 +244,7 @@ with open('input.txt', 'r') as f:
         ' #  # #  # #  # #  # #    #    #  # #  #  ',
         ' #  # #  # #    #  # ###  #    #    #  #  ',
         ' #  # ###  #    #### #    #    #    ###   ',
-        ' #  # # #  #  # #  # #    #    #  # #     '])
+        ' #  # # #  #  # #  # #    #    #  # #     ',
+        '  ##  #  #  ##  #  # #    ####  ##  #     '])
 
-# not 6
-# not 7
-# not 39
 
-# not main.py URCAFLCY
