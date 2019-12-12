@@ -28,6 +28,9 @@ def words(s: str) -> typing.List[str]:
 def make_list(start, stop):
     return list(range(start, stop))
 
+def print_list(values, sep='\n'):
+    print(*values, sep=sep)
+
 def min_max(values):
     return min(values), max(values)
 

@@ -48,10 +48,12 @@ def apply_gravity(m0, m1, axis=None):
 
 
 def sim_step(moons, axis):
+    # Call apply_gravity for each pair of moons
     for j,m0 in enumerate(moons):
         for m1 in moons[j:]:
             if m0 != m1:
                 apply_gravity(m0, m1, axis)
+    # Update the position of each moon using the new velocity
     for m in moons:
         m.update_position()
         print(m)
@@ -66,6 +68,10 @@ def sim_moons_steps(moons, steps):
 
 
 def sim_moons_state(moons):
+    # Each axis is independent, so can be simmed separately
+    # First, find the number of steps for each axis to repeat its state
+    #    This is the number of steps to reach the same initial state
+    # Then, to find the first point where all axes repeat use LCM
     vals = []
     for axis in range(3):
         init_state = ''
@@ -115,20 +121,13 @@ def test():
 
 
 with open('input.txt', 'r') as f:
-    input = f.readlines()
+    input = [util.ints(x) for x in f.readlines()]
+    temp = input.copy()
     moons = []
-    for i,line in enumerate(input):
-        line = line.replace('>', '')
-        line = line.replace('<', '')
-        line = line.replace('x=', '')
-        line = line.replace('y=', '')
-        line = line.replace('z=', '')
-        vals = line.strip().split(', ')
-        vals = [int(x.strip()) for x in vals]
-        print(vals)
-        m = Moon(i,vals, [0,0,0])
+    for i, coords in enumerate(input):
+        m = Moon(i, coords, [0,0,0])
         moons.append(m)
-    print(moons)
+    print(*moons, sep='\n')
 
     # Part 1
     energy = sim_moons_steps(moons, 1000)
