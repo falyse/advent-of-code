@@ -1,7 +1,5 @@
 import sys
-sys.path.append('../intcode')
 sys.path.append('..')
-from intcode import IntcodeComputer
 import util
 import operator
 
@@ -21,9 +19,7 @@ class Moon:
         return 'Moon %0d: pos=%s, vel=%s' % (self.id, self.position, self.velocity)
 
     def update_position(self):
-        # print('  asdf0', self.position)
         self.position = list(map(operator.add, self.position, self.velocity))
-        # print('  asdf1', self.position)
 
     def get_energy(self):
         pe = sum([abs(x) for x in self.position])
@@ -49,57 +45,50 @@ def apply_gravity(m0, m1, axis=None):
         if m0.position[i] > m1.position[i]:
             m0.velocity[i] = v0[i] - 1
             m1.velocity[i] = v1[i] + 1
-        # m0.velocity[i] = v0 + 1 if m0.position[i] > m1.position[i] else v0 - 1 if m0.position[i] < m1.position[i] else v0
-        # m1.velocity[i] = v1 + 1 if m1.position[i] > m0.position[i] else v1 - 1 if m1.position[i] < m0.position[i] else v1
-    # print('old v0', v0, 'new', m0.velocity)
-    # print('apply moons %0d and %0d' % (m0.id, m1.id))
 
-def print_moons(moons):
+
+def sim_step(moons, axis):
+    for j,m0 in enumerate(moons):
+        for m1 in moons[j:]:
+            if m0 != m1:
+                apply_gravity(m0, m1, axis)
     for m in moons:
+        m.update_position()
         print(m)
 
 
-def sim_moons(moons, steps):
+def sim_moons_steps(moons, steps):
+    for i in range(steps):
+        print('step', i)
+        sim_step(moons, None)
+    print('Finished', steps, 'steps')
+    return sum([m.get_energy() for m in moons])
+
+
+def sim_moons_state(moons):
     vals = []
     for axis in range(3):
-    # for axis in range(0,1):
-    #     for m in moons:
-    #         m.reset()
         init_state = ''
         for m in moons:
             init_state += m.get_axis_state_text(axis)
-        print(init_state)
-        i=1
+        i=0
         done = False
         while not done:
             print('step', i)
-            for j,m0 in enumerate(moons):
-                for m1 in moons[j:]:
-                    if m0 != m1:
-                        apply_gravity(m0, m1, axis)
-            text = ''
-            all_zeros = True
+            sim_step(moons, axis)
             state = ''
             for m in moons:
-                m.update_position()
                 state += m.get_axis_state_text(axis)
-                print(m)
-                # if m.velocity[axis] != 0:
-                #     all_zeros = False
             done = state == init_state
             i += 1
         print('Found all zeros for axis', axis, 'at step', i)
-        print(state)
-        print_moons(moons)
-        print()
-        vals.append(i-1)
+        vals.append(i)
     print(vals)
-    print(vals[0] * vals[1] * vals[2])
+    # Number of steps for all axes is the least common multiplier
+    return util.lcmm(*vals)
 
 
 def test():
-    # apply_gravity(Moon([3,0,0], [0,0,0]), Moon([5,0,0], [0,0,0]))
-
     moons = []
     moons.append(Moon(0, [-1,0,2], [0,0,0]))
     moons.append(Moon(1, [2,-10,-7], [0,0,0]))
@@ -107,18 +96,26 @@ def test():
     moons.append(Moon(3, [3,5,-1], [0,0,0]))
     for m in moons:
         print(m)
-    sim_moons(moons, 10)
+
+    # Part 1
+    energy = sim_moons_steps(moons, 10)
+    print('Energy:', energy)
+    assert energy == 179
+
+    for m in moons:
+        m.reset()
+
+    # Part 2
+    num_steps = sim_moons_state(moons)
+    print('Num steps to repeat:', num_steps)
+    assert num_steps == 2772
 
     exit(0)
 # test()
 
 
-
 with open('input.txt', 'r') as f:
-# with open('test.txt', 'r') as f:
     input = f.readlines()
-    # program_code = [int(x) for x in f.read().split(',')]
-    # computer = IntcodeComputer(debug=False)
     moons = []
     for i,line in enumerate(input):
         line = line.replace('>', '')
@@ -133,6 +130,15 @@ with open('input.txt', 'r') as f:
         moons.append(m)
     print(moons)
 
-    sim_moons(moons, 1000)
+    # Part 1
+    energy = sim_moons_steps(moons, 1000)
+    print('Energy:', energy)
+    assert energy == 7988
 
-# Mem error at 44739242
+    for m in moons:
+        m.reset()
+
+    # Part 2
+    num_steps = sim_moons_state(moons)
+    print('Num steps to repeat:', num_steps)
+    assert num_steps == 337721412394184

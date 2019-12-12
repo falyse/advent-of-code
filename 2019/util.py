@@ -1,5 +1,6 @@
 import re
 import typing
+import functools
 from operator import attrgetter
 
 PIXEL_BLACK = '█'
@@ -126,12 +127,16 @@ def binary_search(f, lo=0, hi=None):
 
 
 # Math
-def gcd(a,b):
-    """Compute the greatest common divisor of a and b"""
-    while b > 0:
+def gcd(a, b):
+    """Return greatest common divisor using Euclid's Algorithm."""
+    while b:
         a, b = b, a % b
     return a
 
 def lcm(a, b):
-    """Compute the lowest common multiple of a and b"""
-    return a * b / gcd(a, b)
+    """Return lowest common multiple."""
+    return a * b // gcd(a, b)
+
+def lcmm(*args):
+    """Return lcm of args."""
+    return functools.reduce(lcm, args)
