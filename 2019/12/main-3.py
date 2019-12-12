@@ -38,7 +38,7 @@ class Moon:
 def apply_gravity(m0, m1, axis=None):
     v0 = m0.velocity
     v1 = m1.velocity
-    if axis is not None:
+    if axis:
         axes = [axis]
     else:
         axes = [x for x in range(3)]
@@ -62,9 +62,9 @@ def print_moons(moons):
 def sim_moons(moons, steps):
     vals = []
     for axis in range(3):
-    # for axis in range(0,1):
-    #     for m in moons:
-    #         m.reset()
+    # for axis in range(2,3):
+        for m in moons:
+            m.reset()
         init_state = ''
         for m in moons:
             init_state += m.get_axis_state_text(axis)
@@ -72,7 +72,7 @@ def sim_moons(moons, steps):
         i=1
         done = False
         while not done:
-            print('step', i)
+            # print('step', i)
             for j,m0 in enumerate(moons):
                 for m1 in moons[j:]:
                     if m0 != m1:
@@ -83,7 +83,7 @@ def sim_moons(moons, steps):
             for m in moons:
                 m.update_position()
                 state += m.get_axis_state_text(axis)
-                print(m)
+                # print(m)
                 # if m.velocity[axis] != 0:
                 #     all_zeros = False
             done = state == init_state
@@ -92,7 +92,7 @@ def sim_moons(moons, steps):
         print(state)
         print_moons(moons)
         print()
-        vals.append(i-1)
+        vals.append(i)
     print(vals)
     print(vals[0] * vals[1] * vals[2])
 
@@ -110,7 +110,7 @@ def test():
     sim_moons(moons, 10)
 
     exit(0)
-# test()
+test()
 
 
 

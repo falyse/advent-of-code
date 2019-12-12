@@ -9,13 +9,8 @@ import operator
 class Moon:
     def __init__(self, id, position, velocity):
         self.id = id
-        self.orig_position = position
-        self.orig_velocity = velocity
-        self.reset()
-
-    def reset(self):
-        self.position = list(self.orig_position)
-        self.velocity = list(self.orig_velocity)
+        self.position = position
+        self.velocity = velocity
 
     def __str__(self):
         return 'Moon %0d: pos=%s, vel=%s' % (self.id, self.position, self.velocity)
@@ -31,18 +26,10 @@ class Moon:
         print(self.id, pe, ke)
         return pe * ke
 
-    def get_axis_state_text(self, axis):
-        return '%0d, %0d, %0d' % (self.id, self.position[axis], self.velocity[axis])
-
-
-def apply_gravity(m0, m1, axis=None):
+def apply_gravity(m0, m1):
     v0 = m0.velocity
     v1 = m1.velocity
-    if axis is not None:
-        axes = [axis]
-    else:
-        axes = [x for x in range(3)]
-    for i in axes:
+    for i in range(3):
         if m0.position[i] < m1.position[i]:
             m0.velocity[i] = v0[i] + 1
             m1.velocity[i] = v1[i] - 1
@@ -54,48 +41,30 @@ def apply_gravity(m0, m1, axis=None):
     # print('old v0', v0, 'new', m0.velocity)
     # print('apply moons %0d and %0d' % (m0.id, m1.id))
 
-def print_moons(moons):
-    for m in moons:
-        print(m)
-
 
 def sim_moons(moons, steps):
-    vals = []
-    for axis in range(3):
-    # for axis in range(0,1):
-    #     for m in moons:
-    #         m.reset()
-        init_state = ''
+    # state={}
+    init_state = ''
+    for m in moons:
+        init_state += str(m)
+    i=1
+    while True:
+        print('step', i)
+        for j,m0 in enumerate(moons):
+            for m1 in moons[j:]:
+                if m0 != m1:
+                    apply_gravity(m0, m1)
+        text = ''
         for m in moons:
-            init_state += m.get_axis_state_text(axis)
-        print(init_state)
-        i=1
-        done = False
-        while not done:
-            print('step', i)
-            for j,m0 in enumerate(moons):
-                for m1 in moons[j:]:
-                    if m0 != m1:
-                        apply_gravity(m0, m1, axis)
-            text = ''
-            all_zeros = True
-            state = ''
-            for m in moons:
-                m.update_position()
-                state += m.get_axis_state_text(axis)
-                print(m)
-                # if m.velocity[axis] != 0:
-                #     all_zeros = False
-            done = state == init_state
-            i += 1
-        print('Found all zeros for axis', axis, 'at step', i)
-        print(state)
-        print_moons(moons)
-        print()
-        vals.append(i-1)
-    print(vals)
-    print(vals[0] * vals[1] * vals[2])
-
+            m.update_position()
+            print(m)
+            text += str(m)
+        if text == init_state:
+            print('Found match at step', i)
+            print(text)
+            exit(0)
+        # state[text] = False
+        i += 1
 
 def test():
     # apply_gravity(Moon([3,0,0], [0,0,0]), Moon([5,0,0], [0,0,0]))
@@ -110,7 +79,7 @@ def test():
     sim_moons(moons, 10)
 
     exit(0)
-# test()
+test()
 
 
 
