@@ -8,15 +8,8 @@ from collections import deque
 
 def process_outputs(outputs):
     tiles = []
-    tile = []
-    i = 0
-    for o in outputs:
-        tile.append(o)
-        if not (i+1) % 3:
-            tiles.append(tile)
-            tile = []
-        i += 1
-    # print(items)
+    for i in range(0, len(outputs), 3):
+        tiles.append(outputs[i:i+3])
     return tiles
 
 
@@ -53,16 +46,16 @@ with open('input.txt', 'r') as f:
                     num_blocks -= 1
                 print('Display score:', score, '- Remaining blocks:', num_blocks)
             if id == 3:
-                print('* Paddle at', x, y)
-                xp = x
+                x_paddle = x
             if id == 4:
-                print('Ball at', x, y)
-                xb = x
+                x_ball = x
+                y_ball = y
 
         # Move paddle towards ball
-        if xb > xp:
+        print('Ball at (%0d, %0d), Paddle at x=%0d' % (x_ball, y_ball, x_paddle))
+        if x_ball > x_paddle:
             inputs.append(1)
-        elif xb < xp:
+        elif x_ball < x_paddle:
             inputs.append(-1)
         else:
             inputs.append(0)
