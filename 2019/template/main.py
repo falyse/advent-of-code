@@ -2,6 +2,7 @@ import sys
 sys.path.append('../intcode')
 sys.path.append('..')
 from intcode import IntcodeComputer
+from collections import deque
 import util
 
 
