@@ -4,6 +4,11 @@ sys.path.append('..')
 from intcode import IntcodeComputer
 import util
 from collections import deque
+import os
+import time
+
+render = False
+screen = {}
 
 
 def process_outputs(outputs):
@@ -11,6 +16,34 @@ def process_outputs(outputs):
     for i in range(0, len(outputs), 3):
         tiles.append(outputs[i:i+3])
     return tiles
+
+
+def render_screen(tiles):
+    for x, y, id in tiles:
+        if x >= 0:
+            if (x,y) not in screen:
+                screen[(x,y)] = ' '
+            char = ' '
+            if id == 1:
+                char = '█'
+            if id == 2:
+                char = '▭'
+            if id == 3:
+                char = '▀'
+            if id == 4:
+                char = '●'
+            screen[(x,y)] = char
+    # Display the screen
+    lines = []
+    for y in range(0,22):
+        lines.append(''.join([screen[(x,y)] for x in range(0,37)]))
+    out = '\n'.join(lines) + '\n'
+    out += '█' * 37 + '\n'
+    out += ' ' * 12 + 'Score: %5d\n\n' % score
+    # os.system('clear')
+    sys.stdout.write(out)
+    sys.stdout.flush()
+    time.sleep(0.02)
 
 
 with open('input.txt', 'r') as f:
@@ -35,7 +68,8 @@ with open('input.txt', 'r') as f:
         computer.reset_outputs()
         done = computer.execute()
         outputs = computer.outputs
-        print('outputs', outputs)
+        if not render:
+            print('outputs', outputs)
 
         tiles = process_outputs(outputs)
 
@@ -44,15 +78,20 @@ with open('input.txt', 'r') as f:
                 score = id
                 if score > 0:
                     num_blocks -= 1
-                print('Display score:', score, '- Remaining blocks:', num_blocks)
+                if not render:
+                    print('Display score:', score, '- Remaining blocks:', num_blocks)
             if id == 3:
                 x_paddle = x
             if id == 4:
                 x_ball = x
                 y_ball = y
 
+        if not render:
+            print('Ball at (%0d, %0d), Paddle at x=%0d' % (x_ball, y_ball, x_paddle))
+        if render:
+            render_screen(tiles)
+
         # Move paddle towards ball
-        print('Ball at (%0d, %0d), Paddle at x=%0d' % (x_ball, y_ball, x_paddle))
         if x_ball > x_paddle:
             inputs.append(1)
         elif x_ball < x_paddle:
@@ -63,6 +102,7 @@ with open('input.txt', 'r') as f:
         if num_blocks <= 0:
             break
 
-    print('Final score:', score)
+    if not render:
+        print('Final score:', score)
     assert score == 17336
 
