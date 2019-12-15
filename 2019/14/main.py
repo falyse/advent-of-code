@@ -1,8 +1,6 @@
 import sys
 sys.path.append('../intcode')
 sys.path.append('..')
-from intcode import IntcodeComputer
-from collections import deque
 import util
 import math
 
@@ -79,42 +77,10 @@ class Reaction():
     def __str__(self):
         return 'Reaction: ' + ' '.join([str(x) for x in self.inputs]) + ' -> ' + str(self.output)
 
-amts = {}
-
 def find_reaction_with_output(name):
     for r in reacts:
         if r.output.name == name:
             return r
-
-def recurse(reaction, need=1):
-    eqn = '%0d*(' % need
-    ratio = math.ceil(need / reaction.output.quantity)
-    for i in reaction.inputs:
-        if i.name not in amts:
-            amts[i.name] = 0
-        print('asdf0', i.name, i.quantity, need, reaction.output.quantity)
-        # add = i.quantity
-        add = i.quantity * ratio
-        eqn += '%0d+' % i.quantity
-        print('     adding', add, i.name)
-        amts[i.name] += add
-        print(amts)
-        r = find_reaction_with_output(i.name)
-        if r is not None:
-            eqn += recurse(r, i.quantity * ratio)
-            # recurse(r, i.quantity)
-    eqn += ')'
-    return eqn
-
-def correct_ore():
-    total = 0
-    for r in reacts:
-        if 'ORE' in [x.name for x in r.inputs]:
-            new = math.ceil(amts[r.output.name] / r.output.quantity) * r.inputs[0].quantity
-            print('asdf', r, new)
-            total += new
-    print('Total:', total)
-    return total
 
 
 def create_tree(reacts, start='FUEL', depth=0):
@@ -229,11 +195,6 @@ def max_fuel_from_ore_value(num_ore):
             return i - 1
 
 
-def get_fuel(total_ore):
-    guess = 1000000000000 / total_ore
-    print(guess)
-
-
 
 def test0():
     assert run(r"""10 ORE => 10 A
@@ -290,13 +251,9 @@ def test():
     # exit(0)
 test()
 
+
 with open('input.txt', 'r') as f:
-    # with open('test.txt', 'r') as f:
     input = f.read().strip()
-    # program_code = [int(x) for x in f.read().split(',')]
-    # computer = IntcodeComputer(debug=False)
-    # inputs = deque()
-    # computer.run(program_code, inputs)
 
     # Part 1
     total_ore = run(input)
@@ -304,6 +261,3 @@ with open('input.txt', 'r') as f:
 
     # Part 2
     part2()
-
-
-# 1693718 too high
