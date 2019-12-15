@@ -5,63 +5,6 @@ import util
 import math
 
 reacts = []
-class Node:
-    """Class to define a node in the orbit tree"""
-    def __init__(self, name, depth):
-        self.name = name
-        self.parent = None
-        self.depth = depth
-        self.children = []
-
-    def __str__(self):
-        text = '%sNode %s\n' % (' '*self.depth, self.name)
-        for child in self.children:
-            text += str(child)
-        return text
-
-    def add_child(self, node):
-        node.parent = self
-        self.children.append(node)
-
-    def remove_child(self, node):
-        node.parent = None
-        self.children = self.children.remove(node)
-        if self.children is None:
-            self.children = []
-
-    def get_total_depth(self):
-        return self.depth + sum([x.get_total_depth() for x in self.children])
-
-    def find_node(self, name):
-        """Find descendant node with matching name"""
-        if self.name == name:
-            return self
-        for child in self.children:
-            node = child.find_node(name)
-            if node:
-                return node
-        return None
-
-    def flatten(self):
-        all_nodes = []
-        for child in self.children:
-            all_nodes.extend(child.flatten())
-        all_nodes.append(self)
-        return all_nodes
-
-
-def get_ancestors(node):
-    """Return a list of all parent ancestors from the specified node to the tree root"""
-    ancestors = []
-    while True:
-        parent = node.parent
-        if parent is None:
-            break
-        else:
-            ancestors.append(parent)
-            node = parent
-    return ancestors
-
 
 class Element():
     def __init__(self, name, quantity):
@@ -81,19 +24,6 @@ def find_reaction_with_output(name):
     for r in reacts:
         if r.output.name == name:
             return r
-
-
-def create_tree(reacts, start='FUEL', depth=0):
-    """Construct a tree based on the connections defined in the orbits hash"""
-    node = Node(start, depth)
-    for r in reacts:
-        if r.output.name == start:
-            for i in r.inputs:
-                child = create_tree(reacts, i.name, depth+1)
-                node.add_child(child)
-    return node
-
-# eles = {}
 
 
 def recurse_replace(nums, levels, level):
@@ -118,7 +48,6 @@ def recurse_replace(nums, levels, level):
 
     if len(final.keys()) > 1:
         new,final = recurse_replace(list(new), levels, level+1)
-
 
     return new, final
 
@@ -156,64 +85,33 @@ def get_levels(reacts, levels=None, start='FUEL', depth=0):
 
 
 
+def part2(text):
+    fuel = max_fuel_from_ore_value(text, 1000000000000)
+    assert fuel == 2267486
 
 
-def get_total_ore(text):
+
+def get_total_ore(text, fuel=1):
     global reacts
     reacts = parse_reactions(text)
 
     levels = get_levels(reacts)
     print('Levels', levels)
 
-    # tree = create_tree(reacts)
-    # print(tree)
-    # all_nodes = tree.flatten()
-    # # print(all_nodes)
-    #
-    # for node in all_nodes:
-    #     if node.name == 'ORE':
-    #         ancestors = get_ancestors(node)
-    #         for i, parent in enumerate(ancestors):
-    #             if i > eles[parent.name]:
-    #                 eles[parent.name] = i
-    #
-    # print(eles)
-    return calc_total_ore(1,levels)
-
-def part2():
-    fuel = max_fuel_from_ore_value(1000000000000)
-    assert fuel == 2267486
-
-def calc_total_ore(fuel, levels):
     # nums = [('FUEL', 2267000)]
     nums = [('FUEL', fuel)]
     nums, final = recurse_replace(list(nums), levels, levels['FUEL'])
     print(nums)
     print(final)
 
-    # final = {}
-    # for ele,cnt in nums:
-    #     if ele not in final:
-    #         final[ele] = 0
-    #     final[ele] += cnt
-    # print(' counts:', final)
-    # new = list(final.items())
-
     total_ore = final['ORE']
-    # for r in reacts:
-    #     if 'ORE' in [x.name for x in r.inputs]:
-    #         cnt = math.ceil(final[r.output.name] / r.output.quantity) * r.inputs[0].quantity
-    #         total_ore += cnt
-    #         print('  Adding', cnt, 'ore from', r.output.name)
     print('Total ORE:', total_ore)
     return total_ore
 
-def max_fuel_from_ore_value(num_ore):
-    # nums = [('FUEL', 1)]
-    # for i in range(2)
+def max_fuel_from_ore_value(text, ore):
     for i in range(2267000, 2268000):
-        total_ore = calc_total_ore(i)
-        ratio = (total_ore/1000000000000)
+        total_ore = get_total_ore(text, i)
+        ratio = (total_ore/ore)
         print (ratio)
         if ratio > 1:
             return i - 1
@@ -272,7 +170,7 @@ def test():
     test1()
     test2()
     test3()
-    exit(0)
+    # exit(0)
 test()
 
 
@@ -284,4 +182,4 @@ with open('input.txt', 'r') as f:
     assert total_ore == 1582325
 
     # Part 2
-    part2()
+    part2(input)
