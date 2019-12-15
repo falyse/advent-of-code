@@ -60,10 +60,9 @@ def reverse_dir(dir):
 def render(status_map, loc):
     smap = status_map.copy()
     smap[loc] = 'D'
-    smap[(0,0)] = 'S'
     image = []
     x_vals, y_vals = zip(*smap.keys())
-    for y in reversed(range(min(y_vals), max(y_vals)+1)):
+    for y in (range(min(y_vals), max(y_vals)+1)):
         row = []
         for x in range(min(x_vals), max(x_vals)+1):
             value = smap.get((x, y))
@@ -87,78 +86,51 @@ def get_next_loc(loc, dir):
     return next_loc
 
 
-def test():
-    pass
+def get_unfilled(status_map):
+    num = 0
+    for k, v in status_map.items():
+        if v == '.':
+            num += 1
+    return num
 
 
-test()
+max_depth = 0
+def set_adjacent(status_map, loc, depth=0):
+    global max_depth
+    if depth > max_depth:
+        max_depth = depth
+    print('Depth', depth, 'max', max_depth)
+    render(status_map, loc)
+    # if depth == 25:
+    #     exit(1)
+    adj_dir = search_for_exit(status_map, loc)
+    for d in adj_dir:
+        adj_loc = get_next_loc(loc, d)
+        status_map[adj_loc] = 'O'
+        status_map = set_adjacent(status_map, adj_loc, depth+1)
+    return status_map
 
-with open('input.txt', 'r') as f:
-    program_code = [int(x) for x in f.read().split(',')]
-    computer = IntcodeComputer(debug=False)
-    inputs = deque()
-    computer.initialize(program_code, inputs)
 
+
+with open('map.txt', 'r') as f:
+    x = 0
+    y = 0
     status_map = {}
-    num_moves = 0
-    dir = 1
     loc = (0,0)
-    status_map[loc] = '.'
-    history = {}
-    while True:
-        print('Move', num_moves, 'in dir', dir)
-        num_moves += 1
-        inputs.append(dir)
-        computer.reset_outputs()
-        done = computer.execute()
-        status = computer.outputs[0]
+    for line in f.readlines():
+        y += 1
+        x = 0
+        for char in line.strip('\n'):
+            x += 1
+            status_map[(x,y)] = char
+            if char == 'X':
+                loc = (x,y)
+    print('Loc', loc)
+    render(status_map, loc)
 
-        if not loc in history:
-            history[loc] = set()
-        history[loc].add(dir)
+    # Set adjacent squares
+    status_map = set_adjacent(status_map, loc)
+    print('Max depth', max_depth)
 
-        # Calc next potential location
-        orig_loc = loc
-        move_loc = get_next_loc(loc, dir)
 
-        # Process status code
-        if status == 0:
-            status_map[move_loc] = '#'
-        elif status == 1:
-            status_map[loc] = '.'
-            loc = move_loc
-        elif status == 2:
-            status_map[move_loc] = 'X'
-            loc = move_loc
-        else:
-            print('Unknown status', status)
-            exit(1)
-
-        # print('  loc', loc, 'is', status)
-        render(status_map, loc)
-
-        # Determine next move command
-        # if status == 0:
-        #     # Hit a wall, change direction
-        #     dir = change_dir(status_map, loc, dir)
-        # elif loc in status_map:
-        #     # Backtracking, look for open space
-        #     dir = change_dir(status_map, loc, dir)
-
-        if status == 0 or loc in status_map:
-            loop = 0
-            while dir in history[orig_loc]:
-                dir = change_dir(status_map, loc, dir)
-                loop += 1
-                if loop > 10:
-                    break
-
-        # Hack to fix infinite loop on backtrack to start
-        if loc == (0,0) or loc == (0,1):
-            dir = 1
-
-        if status == 2:
-            print('Finished at step', num_moves)
-            # exit(0)
-
-# 305 too high
+# 311 too high
