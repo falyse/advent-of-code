@@ -97,7 +97,7 @@ def calc_total_ore(reactions, fuel):
 def calc_ore(name, reactions, need):
     print('Calc ore', name, need[name])
     if name == 'ORE':
-        return 0
+        return need[name]
     r = reactions[name]
     for i in r.inputs:
         need[i.name] += i.quantity * math.ceil(need[name] / r.output.quantity)
