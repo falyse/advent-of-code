@@ -64,7 +64,9 @@ def parse_reactions(text):
         ro = Element(n, q)
         reaction = Reaction(ri, ro)
         reactions[n] = reaction
-    return reactions
+
+    levels = get_levels(reactions)
+    return reactions, levels
 
 
 def get_levels(reactions, levels=None, start='FUEL', depth=0):
@@ -80,12 +82,13 @@ def get_levels(reactions, levels=None, start='FUEL', depth=0):
     return levels
 
 
-def get_total_ore(text, fuel=1):
-    reactions = parse_reactions(text)
-
-    levels = get_levels(reactions)
+def get_total_ore(text):
+    reactions, levels = parse_reactions(text)
     print('Levels', levels)
+    return calc_total_ore(reactions, levels, 1)
 
+
+def calc_total_ore(reactions, levels, fuel):
     # nums = [('FUEL', 2267000)]
     nums = [('FUEL', fuel)]
     nums, final = recurse_replace(reactions, list(nums), levels, levels['FUEL'])
@@ -98,8 +101,9 @@ def get_total_ore(text, fuel=1):
 
 
 def max_fuel_from_ore_value(text, ore):
+    reactions, levels = parse_reactions(text)
     for i in range(2267000, 2268000):
-        total_ore = get_total_ore(text, i)
+        total_ore = calc_total_ore(reactions, levels, i)
         ratio = (total_ore / ore)
         print(ratio)
         if ratio > 1:
@@ -162,7 +166,7 @@ def test():
     test1()
     test2()
     test3()
-    exit(0)
+    # exit(0)
 
 
 test()
