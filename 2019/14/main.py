@@ -1,45 +1,51 @@
 import sys
+
 sys.path.append('../intcode')
 sys.path.append('..')
 import util
 import math
 
-reacts = []
 
 class Element():
     def __init__(self, name, quantity):
-        self.name =name
+        self.name = name
         self.quantity = int(quantity)
+
     def __str__(self):
         return str(self.quantity) + ' ' + self.name
+
 
 class Reaction():
     def __init__(self, inputs, output):
         self.inputs = inputs
         self.output = output
+
     def __str__(self):
         return 'Reaction: ' + ' '.join([str(x) for x in self.inputs]) + ' -> ' + str(self.output)
 
-def find_reaction_with_output(name):
-    for r in reacts:
-        if r.output.name == name:
-            return r
+class ReactionTest():
+    def __init__(self, quantity, inputs):
+        self.quantity = quantity
+        self.inputs = inputs
+
+    def __str__(self):
+        return 'Reaction: ' + ' '.join([str(x) for x in self.inputs]) + ' -> ' + str(self.quantity)
 
 
-def recurse_replace(nums, levels, level):
+def recurse_replace(reactions, nums, levels, level):
     print(nums)
     print('Replace level', level)
     new = []
-    for k,v in nums:
+    for k, v in nums:
         if levels[k] == level:
-            r = find_reaction_with_output(k)
+            r = reactions[k]
             for i in r.inputs:
-                new.append((i.name, i.quantity*math.ceil(v/r.output.quantity)))
+                new.append((i.name, i.quantity * math.ceil(v / r.output.quantity)))
         else:
-            new.append((k,v))
+            new.append((k, v))
     final = {}
 
-    for ele,cnt in new:
+    for ele, cnt in new:
         if ele not in final:
             final[ele] = 0
         final[ele] += cnt
@@ -47,42 +53,39 @@ def recurse_replace(nums, levels, level):
     new = list(final.items())
 
     if len(final.keys()) > 1:
-        new,final = recurse_replace(list(new), levels, level+1)
+        new, final = recurse_replace(reactions, list(new), levels, level + 1)
 
     return new, final
 
 
 def parse_reactions(text):
-    reacts = []
-    fuel_reaction = None
+    reactions = {}
     for line in text.strip().splitlines():
         inputs, output = line.strip().split(' => ')
         ri = []
+        ri_test = []
         for i in inputs.split(', '):
             q, n = i.split(' ')
-            ri.append(Element(n,q))
+            ri.append(Element(n, q))
+            ri_test.append((q, n))
         q, n = output.split(' ')
-        ro = Element(n,q)
-        # eles[n] = 0
+        ro = Element(n, q)
         reaction = Reaction(ri, ro)
-        if n == 'FUEL':
-            fuel_reaction = reaction
-        reacts.append(reaction)
-    print([str(x) for x in reacts])
-    return reacts
+        reactions[n] = reaction
+    return reactions
 
-def get_levels(reacts, levels=None, start='FUEL', depth=0):
+
+def get_levels(reactions, levels=None, start='FUEL', depth=0):
     if levels is None:
         levels = {}
     if start not in levels:
         levels[start] = 0
     levels[start] = max(depth, levels[start])
-    for r in reacts:
+    for o,r in reactions.items():
         if r.output.name == start:
             for i in r.inputs:
-                get_levels(reacts, levels, i.name, depth+1)
+                get_levels(reactions, levels, i.name, depth + 1)
     return levels
-
 
 
 def part2(text):
@@ -90,17 +93,15 @@ def part2(text):
     assert fuel == 2267486
 
 
-
 def get_total_ore(text, fuel=1):
-    global reacts
-    reacts = parse_reactions(text)
+    reactions = parse_reactions(text)
 
-    levels = get_levels(reacts)
+    levels = get_levels(reactions)
     print('Levels', levels)
 
     # nums = [('FUEL', 2267000)]
     nums = [('FUEL', fuel)]
-    nums, final = recurse_replace(list(nums), levels, levels['FUEL'])
+    nums, final = recurse_replace(reactions, list(nums), levels, levels['FUEL'])
     print(nums)
     print(final)
 
@@ -108,14 +109,14 @@ def get_total_ore(text, fuel=1):
     print('Total ORE:', total_ore)
     return total_ore
 
+
 def max_fuel_from_ore_value(text, ore):
     for i in range(2267000, 2268000):
         total_ore = get_total_ore(text, i)
-        ratio = (total_ore/ore)
-        print (ratio)
+        ratio = (total_ore / ore)
+        print(ratio)
         if ratio > 1:
             return i - 1
-
 
 
 def test0():
@@ -126,6 +127,7 @@ def test0():
     7 A, 1 D => 1 E
     7 A, 1 E => 1 FUEL""") == 31
 
+
 def test1():
     print('\n' * 10)
     assert get_total_ore(r"""9 ORE => 2 A
@@ -135,6 +137,7 @@ def test1():
 5 B, 7 C => 1 BC
 4 C, 1 A => 1 CA
 2 AB, 3 BC, 4 CA => 1 FUEL""") == 165
+
 
 def test2():
     assert get_total_ore(r"""
@@ -148,6 +151,7 @@ def test2():
 165 ORE => 2 GPVTF
 3 DCFZ, 7 NZVS, 5 HKGWZ, 10 PSHF => 8 KHKGT
     """) == 13312
+
 
 def test3():
     assert get_total_ore(r"""
@@ -165,14 +169,16 @@ def test3():
 176 ORE => 6 VJHF 
     """) == 180697
 
+
 def test():
     test0()
     test1()
     test2()
     test3()
-    # exit(0)
-test()
+    exit(0)
 
+
+test()
 
 with open('input.txt', 'r') as f:
     input = f.read().strip()
