@@ -6,6 +6,7 @@ from collections import deque
 import util
 import math
 
+reacts = []
 class Node:
     """Class to define a node in the orbit tree"""
     def __init__(self, name, depth):
@@ -78,7 +79,6 @@ class Reaction():
     def __str__(self):
         return 'Reaction: ' + ' '.join([str(x) for x in self.inputs]) + ' -> ' + str(self.output)
 
-reacts = []
 amts = {}
 
 def find_reaction_with_output(name):
@@ -157,6 +157,8 @@ def recurse_replace(nums, level):
 
 
 def run(text):
+    global reacts
+    reacts = []
     fuel_reaction = None
     for line in text.strip().splitlines():
         inputs, output = line.strip().split(' => ')
@@ -186,39 +188,45 @@ def run(text):
                     eles[parent.name] = i
 
     print(eles)
+    return get_total_ore(1)
 
+def part2():
+    fuel = max_fuel_from_ore_value(1000000000000)
+    assert fuel == 2267486
+
+def get_total_ore(fuel):
+    # nums = [('FUEL', 2267000)]
+    nums = [('FUEL', fuel)]
+    nums, _ = recurse_replace(list(nums), eles['FUEL'])
+    print(nums)
+
+    final = {}
+    for ele,cnt in nums:
+        if ele not in final:
+            final[ele] = 0
+        final[ele] += cnt
+    print(' counts:', final)
+    new = list(final.items())
+
+    total_ore = 0
+    for r in reacts:
+        if 'ORE' in [x.name for x in r.inputs]:
+            # if r.output.name in final:
+            cnt = math.ceil(final[r.output.name] / r.output.quantity) * r.inputs[0].quantity
+            total_ore += cnt
+            print('  Adding', cnt, 'ore from', r.output.name)
+    print('Total ORE:', total_ore)
+    return total_ore
+
+def max_fuel_from_ore_value(num_ore):
     # nums = [('FUEL', 1)]
     # for i in range(2)
     for i in range(2267000, 2268000):
-        # nums = [('FUEL', 2267000)]
-        nums = [('FUEL', i)]
-        nums, _ = recurse_replace(list(nums), eles['FUEL'])
-        print(nums)
-
-        final = {}
-        for ele,cnt in nums:
-            if ele not in final:
-                final[ele] = 0
-            final[ele] += cnt
-        print(' counts:', final)
-        new = list(final.items())
-
-        total_ore = 0
-        for r in reacts:
-            if 'ORE' in [x.name for x in r.inputs]:
-                cnt = math.ceil(final[r.output.name] / r.output.quantity) * r.inputs[0].quantity
-                total_ore += cnt
-                print('  Adding', cnt, 'ore from', r.output.name)
-        print('Total ORE:', total_ore)
-
+        total_ore = get_total_ore(i)
         ratio = (total_ore/1000000000000)
         print (ratio)
         if ratio > 1:
-            exit(0)
-
-    # get_fuel(total_ore)
-
-    return total_ore
+            return i - 1
 
 
 def get_fuel(total_ore):
@@ -234,7 +242,6 @@ def test0():
     7 A, 1 C => 1 D
     7 A, 1 D => 1 E
     7 A, 1 E => 1 FUEL""") == 31
-    exit(0)
 
 def test1():
     print('\n' * 10)
@@ -245,7 +252,6 @@ def test1():
 5 B, 7 C => 1 BC
 4 C, 1 A => 1 CA
 2 AB, 3 BC, 4 CA => 1 FUEL""") == 165
-    exit(0)
 
 def test2():
     assert run(r"""
@@ -259,7 +265,6 @@ def test2():
 165 ORE => 2 GPVTF
 3 DCFZ, 7 NZVS, 5 HKGWZ, 10 PSHF => 8 KHKGT
     """) == 13312
-    exit(0)
 
 def test3():
     assert run(r"""
@@ -276,12 +281,14 @@ def test3():
 1 VJHF, 6 MNCFX => 4 RFSQX
 176 ORE => 6 VJHF 
     """) == 180697
-    exit(0)
 
-# test0()
-# test1()
-# test2()
-# test3()
+def test():
+    test0()
+    test1()
+    test2()
+    test3()
+    # exit(0)
+test()
 
 with open('input.txt', 'r') as f:
     # with open('test.txt', 'r') as f:
@@ -291,7 +298,12 @@ with open('input.txt', 'r') as f:
     # inputs = deque()
     # computer.run(program_code, inputs)
 
-    run(input)
+    # Part 1
+    total_ore = run(input)
+    assert total_ore == 1582325
+
+    # Part 2
+    part2()
 
 
 # 1693718 too high
