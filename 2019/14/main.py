@@ -23,14 +23,6 @@ class Reaction():
     def __str__(self):
         return 'Reaction: ' + ' '.join([str(x) for x in self.inputs]) + ' -> ' + str(self.output)
 
-class ReactionTest():
-    def __init__(self, quantity, inputs):
-        self.quantity = quantity
-        self.inputs = inputs
-
-    def __str__(self):
-        return 'Reaction: ' + ' '.join([str(x) for x in self.inputs]) + ' -> ' + str(self.quantity)
-
 
 def recurse_replace(reactions, nums, levels, level):
     print(nums)
@@ -81,16 +73,11 @@ def get_levels(reactions, levels=None, start='FUEL', depth=0):
     if start not in levels:
         levels[start] = 0
     levels[start] = max(depth, levels[start])
-    for o,r in reactions.items():
+    for o, r in reactions.items():
         if r.output.name == start:
             for i in r.inputs:
                 get_levels(reactions, levels, i.name, depth + 1)
     return levels
-
-
-def part2(text):
-    fuel = max_fuel_from_ore_value(text, 1000000000000)
-    assert fuel == 2267486
 
 
 def get_total_ore(text, fuel=1):
@@ -188,4 +175,5 @@ with open('input.txt', 'r') as f:
     assert total_ore == 1582325
 
     # Part 2
-    part2(input)
+    fuel = max_fuel_from_ore_value(input, 1000000000000)
+    assert fuel == 2267486
