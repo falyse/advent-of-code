@@ -1,10 +1,7 @@
-import sys
-sys.path.append('..')
-import util
-
 def run_fft(input, num_phases):
     digits = [int(x) for x in input.strip()]
     for i in range(num_phases):
+        print('Starting phase', i)
         digits = calc_fft(digits)
     result = ''.join([str(x) for x in digits])
     result = result[0:8]
@@ -28,7 +25,7 @@ def calc_fft(digits):
         output = ones_digit(output)
         outputs.append(output)
         # print(output)
-    print(outputs)
+    # print(outputs)
     return outputs
 
 
@@ -60,4 +57,6 @@ def test():
 
 with open('input.txt', 'r') as f:
     input = f.read()
-    run_fft(input, 100)
+    result = run_fft(input, 100)
+    print('Result:', result)
+    assert result == '22122816'
