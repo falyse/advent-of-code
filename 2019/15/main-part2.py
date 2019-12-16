@@ -1,37 +1,8 @@
 import sys
-sys.path.append('../intcode')
 sys.path.append('..')
-from intcode import IntcodeComputer
-from collections import deque
 import util
 import operator
-import random
 
-random.seed(2)
-
-def change_dir(status_map, loc, dir):
-    # If more than one is found, choose randomly
-    empty_dirs = search_for_empty(status_map, loc)
-    if len(empty_dirs) > 0:
-        i = random.randint(0, len(empty_dirs)-1)
-        return empty_dirs[i]
-    exit_dirs = search_for_exit(status_map, loc)
-    if len(exit_dirs) > 0:
-        i = random.randint(0, len(exit_dirs)-1)
-        return exit_dirs[i]
-
-
-def search_for_empty(status_map, loc):
-    empty = []
-    if not status_map.get(get_next_loc(loc, 1)):
-        empty.append(1)
-    if not status_map.get(get_next_loc(loc, 2)):
-        empty.append(2)
-    if not status_map.get(get_next_loc(loc, 3)):
-        empty.append(3)
-    if not status_map.get(get_next_loc(loc, 4)):
-        empty.append(4)
-    return empty
 
 def search_for_exit(status_map, loc):
     exits = []
@@ -44,17 +15,6 @@ def search_for_exit(status_map, loc):
     if status_map.get(get_next_loc(loc, 4)) == '.':
         exits.append(4)
     return exits
-
-
-def reverse_dir(dir):
-    if dir == 1:
-        return 2
-    if dir == 2:
-        return 1
-    if dir == 3:
-        return 4
-    if dir == 4:
-        return 3
 
 
 def render(status_map, loc):
@@ -101,8 +61,6 @@ def set_adjacent(status_map, loc, depth=0):
         max_depth = depth
     print('Depth', depth, 'max', max_depth)
     render(status_map, loc)
-    # if depth == 25:
-    #     exit(1)
     adj_dir = search_for_exit(status_map, loc)
     for d in adj_dir:
         adj_loc = get_next_loc(loc, d)
@@ -130,7 +88,7 @@ with open('map.txt', 'r') as f:
 
     # Set adjacent squares
     status_map = set_adjacent(status_map, loc)
-    print('Max depth', max_depth)
+    total_time = max_depth - 1
+    print('Total time', total_time)
+    assert total_time == 310
 
-
-# 311 too high
