@@ -14,3 +14,8 @@
 * Day 9: Sensor Boost (Intcode: relative base)
 * Day 10: Monitoring Station
 * Day 11: Space Police (Intcode: robot painting)
+* Day 12: The N-Body Problem (moon simulation)
+* Day 13: Care Package (Intcode: breakout game)
+* Day 14: Space Stoichiometry
+* Day 15: Oxygen System (Intcode: oxygen droid)
+

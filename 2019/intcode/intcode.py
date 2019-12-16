@@ -1,4 +1,5 @@
 from collections import deque
+from copy import deepcopy
 
 
 class IntcodeComputer:
@@ -126,5 +127,12 @@ class IntcodeComputer:
             modes.append(0)
         return modes
 
+    def set_inputs(self, inputs):
+        self.inputs = inputs
+
     def reset_outputs(self):
         self.outputs = []
+
+    def clone(self):
+        return deepcopy(self)
+

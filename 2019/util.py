@@ -7,6 +7,7 @@ PIXEL_BLACK = '█'
 PIXEL_LIGHT = '░'
 PIXEL_WHITE = ' '
 
+
 # Extract types
 def ints(s: str) -> typing.List[int]:
     return lmap(int, re.findall(r"-?\d+", s))
@@ -46,6 +47,7 @@ def lmap(func, *iterables):
 
 def attribute_min_max(values, attribute):
     return min(values, key=attrgetter(attribute)), max(values, key=attrgetter(attribute))
+
 
 # Grid
 def text_to_grid(text, map):
@@ -127,6 +129,47 @@ def binary_search(f, lo=0, hi=None):
         else:
             hi = mid - 1
     return best_so_far
+
+def dfs(graph, start, visited=None):
+    if visited is None:
+        visited = set()
+    visited.add(start)
+    for next in graph[start] - visited:
+        dfs(graph, next, visited)
+    return visited
+
+def dfs_paths(graph, start, goal, path=None):
+    if path is None:
+        path = [start]
+    if start == goal:
+        yield path
+    for next in graph[start] - set(path):
+        yield from dfs_paths(graph, next, goal, path + [next])
+
+def bfs(graph, start):
+    visited, queue = set(), [start]
+    while queue:
+        vertex = queue.pop(0)
+        if vertex not in visited:
+            visited.add(vertex)
+            queue.extend(graph[vertex] - visited)
+    return visited
+
+def bfs_paths(graph, start, goal):
+    queue = [(start, [start])]
+    while queue:
+        (vertex, path) = queue.pop(0)
+        for next in graph[vertex] - set(path):
+            if next == goal:
+                yield path + [next]
+            else:
+                queue.append((next, path + [next]))
+
+def shortest_path(graph, start, goal):
+    try:
+        return next(bfs_paths(graph, start, goal))
+    except StopIteration:
+        return None
 
 
 # Math
