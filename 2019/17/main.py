@@ -400,6 +400,9 @@ with open('input.txt', 'r') as f:
     path = map_path(status_map)
     routine = create_routine(path)
     assert check_path(status_map, routine) is True
+
+    print(''.join([str(x) for x in path]))
+
     # Run routine
     program_code[0] = 2
     inputs = deque(routine.get_intcode_inputs())
@@ -409,6 +412,4 @@ with open('input.txt', 'r') as f:
     dust_collected = computer.outputs[-1]
     print(computer.outputs)
     print('Dust collected:', dust_collected)
-
-    # 1461 too low
-
+    assert dust_collected == 732985
