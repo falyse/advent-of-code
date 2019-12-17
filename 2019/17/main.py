@@ -252,16 +252,19 @@ def get_open_dirs(status_map, loc):
     return opens
 
 
-def create_routine(path):
+def create_routine(path, complex=False):
     pairs = [(path[i], path[i+1]) for i in range(0, len(path), 2)]
     print(pairs)
     i = 0
     routine = None
     while routine is None:
         print('Iteration', i)
-        routine = search_for_valid_routine(pairs, i)
+        if complex:
+            routine = search_for_valid_routine_complex(path, i)
+        else:
+            routine = search_for_valid_routine(pairs, i)
         i += 1
-        if i > 10:
+        if i > 1000:
             print('Hit max iterations in routine search')
             exit(1)
     return routine
@@ -312,6 +315,48 @@ def search_for_valid_routine(pairs, skip):
     return r
 
 
+def search_for_valid_routine_complex(path, skip):
+    len_limit = 10
+    text = path_to_text(path)
+    funcs = []
+    func_char = 'A'
+    cnt = 0
+    for l in reversed(range(1, len_limit)):
+        sub_found = True
+        while sub_found:
+            sub_found = False
+            for i in range(0, len(text)-l):
+                sub_text = text[i:i+l]
+                right_text = text[i+2:]
+                if re.search(r'[A-C]', sub_text):
+                    continue
+                # print('checking sub', sub_text, 'in', right_text)
+                if sub_text in right_text:
+                    cnt += 1
+                    if cnt <= skip:
+                        print('  sub skip', sub_text, 'skip', skip, cnt)
+                        continue
+                    print('  sub match', sub_text)
+                    funcs.append(sub_text)
+                    if len(funcs) > 3:
+                        return None
+                    text = re.sub(sub_text, func_char, text)
+                    func_char = chr(ord(func_char) + 1)
+                    # print('  new', text)
+                    sub_found = True
+    text = text.replace('f0', 'A')
+    text = text.replace('f1', 'B')
+    text = text.replace('f2', 'C')
+    print(text)
+    print(funcs)
+    if 'R' in text or 'L' in text or len(funcs) > 3:
+        print('  Invalid routine')
+        return None
+    r = Routine(text, *funcs, True)
+    print(r)
+    return r
+
+
 def pairs_to_text(pairs):
     text = ''
     for pair in pairs:
@@ -325,10 +370,18 @@ def text_to_pairs(text):
     pairs = list(zip(dirs, steps))
     return pairs
 
+
+def path_to_text(path):
+    return ''.join([str(x) for x in path])
+
+
+def text_to_path(text):
+    return [x for x in text]
+
+
 def text_to_list(text):
     pairs = text_to_pairs(text)
     return [val for pair in pairs for val in pair]
-
 
 
 def test():
@@ -413,3 +466,15 @@ with open('input.txt', 'r') as f:
     print(computer.outputs)
     print('Dust collected:', dust_collected)
     assert dust_collected == 732985
+
+    exit(0)
+    
+    # Part 3 - More challenging scaffolding
+    # https://www.reddit.com/r/adventofcode/comments/ebz338/2019_day_17_part_2_pathological_pathfinding/
+    with open('pathological_pathfinding.txt', 'r') as f0:
+        status_map = text_to_status_map(f0.read())
+        render(status_map)
+        path = map_path(status_map)
+        routine = create_routine(path, complex=True)
+        assert check_path(status_map, routine) is True
+
