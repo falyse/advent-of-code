@@ -11,27 +11,10 @@ def process_outputs(outputs):
     status_map = {}
     loc = (0,0)
     for o in outputs:
-        if o == 35:
-            status_map[loc] = '#'
-        elif o == 46:
-            status_map[loc] = '.'
-        elif o == 60:
-            status_map[loc] = '>'
-        elif o == 62:
-            status_map[loc] = '<'
-        elif o == 94:
-            status_map[loc] = '^'
-        elif o == 76:
-            status_map[loc] = 'v'
-        elif o == 58:
-            status_map[loc] = 'X'
-        elif o == 10:
+        if o == 10:
             loc = (0, loc[1] + 1)
-            print(status_map)
         else:
-            print('Unrecognized code', o)
-            exit(1)
-        if o != 10:
+            status_map[loc] = chr(o)
             loc = (loc[0] + 1, loc[1])
     return status_map
 
@@ -56,6 +39,7 @@ def render(status_map, inters=[]):
     text = '\n'.join(image)
     print(text)
 
+
 def find_intersections(status_map):
     inters = []
     for loc in status_map:
@@ -70,7 +54,6 @@ def calc_param(inters):
     for int in inters:
         value += int[0] * int[1]
     return value
-
 
 
 def is_intersection(status_map, loc):
@@ -113,56 +96,3 @@ with open('input.txt', 'r') as f:
     alignment_param = calc_param(inters)
     print('Alignment parameter:', alignment_param)
     assert alignment_param == 5724
-    exit(0)
-
-    computer.initialize(program_code, inputs)
-    status_map = {}
-    dir = 1
-    loc = (0,0)
-    status_map[loc] = '.'
-    history = {}
-    visited = set()
-    queue = [{'loc': loc, 'steps': 0, 'computer': computer}]
-
-    found = False
-    while not found:
-        current = queue.pop()
-        loc = current['loc']
-        if current['loc'] not in visited:
-            visited.add(loc)
-            current_computer = current['computer']
-            steps = current['steps'] + 1
-            print('Move', steps, 'loc', loc)
-
-            for dir in range(1,5):
-                # print('    Dir', dir)
-                move_loc = get_next_loc(loc, dir)
-                new_computer = current_computer.clone()
-
-                new_computer.set_inputs(deque([dir]))
-                new_computer.reset_outputs()
-                done = new_computer.execute()
-                status = new_computer.outputs[0]
-
-                # Process status code
-                if status == 0:
-                    status_map[move_loc] = '#'
-                elif status == 1:
-                    status_map[move_loc] = '.'
-                elif status == 2:
-                    status_map[move_loc] = 'X'
-                else:
-                    print('Unknown status', status)
-                    exit(1)
-
-                if status == 2:
-                    print('Finished at step', steps)
-                    found = True
-                elif status == 0:
-                    visited.add(move_loc)
-                else:
-                    queue.append({'loc': move_loc, 'steps': steps, 'computer': new_computer})
-
-            render(status_map, loc)
-
-    assert steps == 304
