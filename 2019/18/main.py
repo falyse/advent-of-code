@@ -5,6 +5,10 @@ import operator
 import re
 
 
+re_key = re.compile(r'[a-z]')
+re_door = re.compile(r'[A-Z]')
+
+
 def text_to_maze(text):
     loc = (0,0)
     maze = {}
@@ -16,8 +20,9 @@ def text_to_maze(text):
     return maze
 
 
-def render(maze):
+def render(maze, loc):
     maze = maze.copy()
+    maze[loc] = '@'
     image = []
     x_vals, y_vals = zip(*maze.keys())
     for y in reversed(range(min(y_vals), max(y_vals)+1)):
@@ -35,11 +40,11 @@ def render(maze):
 
 
 def maze_has_key(maze):
-    return any([re_key.match(x) for x in maze])
+    return any([re_key.match(x) for x in maze.values()])
 
 
 def get_current_loc(maze):
-    locs = [v for v in maze.values() if v == '@']
+    locs = [k for k,v in maze.items() if v == '@']
     return locs[0]
 
 
@@ -53,50 +58,41 @@ def get_next_loc(loc, dir):
     return next_loc
 
 
-def get_open_dirs(status_map, loc):
+def get_open_dirs(maze, loc):
     opens = []
     for d in range(1, 5):
-        val = status_map.get(get_next_loc(loc, d))
+        val = maze.get(get_next_loc(loc, d))
         if val is not None and val != '#':
             opens.append(d)
     return opens
 
 
-def test():
-    pass
-test()
-
-
-with open('input.txt', 'r') as f:
-    maze = text_to_maze(f.read().strip())
+def solve_maze(input):
+    maze = text_to_maze(input)
     loc = get_current_loc(maze)
-    render(maze)
-
-    re_key = re.compile(r'[a-z]')
-    re_door = re.compile(r'[A-Z]')
+    maze[loc] = '.'
+    render(maze, loc)
 
     # BFS to all letters
     keyring = set()
     visited = set()
     queue = [{'loc': loc, 'steps': 0}]
-    found = False
-    while not maze_has_key():
+    while maze_has_key(maze):
         current = queue.pop()
         loc = current['loc']
         if current['loc'] not in visited:
             visited.add(loc)
-            steps = current['steps'] + 1
-            print('Move', steps, 'loc', loc)
+            steps = current['steps']
+            print('At loc', loc, 'in', steps, 'steps')
 
-            open_dirs =
-            for dir in range(1,5):
+            for dir in get_open_dirs(maze, loc):
                 print('    Dir', dir)
                 move_loc = get_next_loc(loc, dir)
 
+                moved = True
                 if re_key.match(maze[loc]):
                     print('  Found key', maze[loc], 'at', steps, 'steps')
                     keyring.add(maze[loc])
-                    maze[loc] = '.'
                 if re_door.match(maze[loc]):
                     print('  Found door', maze[loc], 'at', steps, 'steps')
                     matching_key = maze[loc].lower()
@@ -104,17 +100,32 @@ with open('input.txt', 'r') as f:
                         print('    unlocked!')
                     else:
                         print('    locked')
-
-
-                all_keys_found = not maze_has_key(maze)
-                if status == 2:
-                    print('Finished at step', steps)
-                    found = True
-                elif status == 0:
-                    visited.add(move_loc)
-                else:
-                    queue.append({'loc': move_loc, 'steps': steps, 'computer': new_computer})
+                        moved = False
+                if moved:
+                    maze[loc] = '.'
+                    queue.append({'loc': move_loc, 'steps': steps+1})
 
             render(maze, loc)
 
-    assert steps == 304
+
+def test():
+#     assert solve_maze(r"""
+# #########
+# #b.A.@.a#
+# #########
+#     """) == 8
+
+    assert solve_maze(r"""
+########################
+#f.D.E.e.C.b.A.@.a.B.c.#
+######################.#
+#d.....................#
+########################    
+    """) == 86
+    
+    exit(0)
+test()
+
+
+with open('input.txt', 'r') as f:
+    solve_maze(f.read())
