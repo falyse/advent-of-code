@@ -3,7 +3,6 @@ sys.path.append('..')
 import util
 import operator
 import re
-from itertools import permutations
 
 
 re_key = re.compile(r'[a-z]')
@@ -71,62 +70,36 @@ def get_open_dirs(maze, loc):
 def solve_maze(input):
     maze = text_to_maze(input)
     loc = get_current_loc(maze)
-    all_paths, all_keys = find_all_paths(maze)
-    perms = permutations(all_keys)
-    min_steps = None
-    for p in list(perms):
-        prev_key = '@'
-        total_steps = 0
-        needs_met = True
-        for i, key in enumerate(p):
-            # First check if all prerequisite keys have been collected
-            needs = all_paths[(prev_key, key)]['needs']
-            for n in needs:
-                if n not in p[0:i]:
-                    print(key, 'requires', n)
-                    needs_met = False
-            if not needs_met:
-                continue
-            # If so, add the path steps to the total
-            steps = all_paths[(prev_key, key)]['steps']
-            print(prev_key, 'to', key, '=', steps)
-            total_steps += steps
-            prev_key = key
-        print('Permutation', p, '=', total_steps, 'needs met:', needs_met)
-        if not needs_met:
-            continue
-        if min_steps is None or total_steps < min_steps:
-            min_steps = total_steps
-    print('Min steps:', min_steps)
-    return min_steps
+    maze[loc] = '.'
+
+    total_steps = 0
+    keyring = set()
+    key_paths = find_key_paths(maze, loc)
+    while True:
+        render(maze, loc)
+        util.pretty_print(key_paths)
+        open_keys = [k for k,v in key_paths.items() if len(v['doors']) == 0]
+        print('Open keys:', open_keys)
+        if len(open_keys) == 0:
+            print('Total steps:', total_steps)
+            return total_steps
+        elif len(open_keys) == 1:
+            key = open_keys[0]
+            loc = key_paths[key]['loc']
+            total_steps += key_paths[key]['steps']
+            keyring.add(key)
+            print('Got key', key, ': total steps', total_steps)
+            clear_key_from_maze(maze, key)
+            key_paths = find_key_paths(maze, loc)
+        else:
+            print('Len > 1')
+            exit(1)
 
 
 def clear_key_from_maze(maze, key):
     for loc,v in maze.items():
         if v == key or v == key.upper():
             maze[loc] = '.'
-
-
-def find_all_paths(maze):
-    all_paths = {}
-    # First create a hash of the current loc and all keys and doors
-    items = {'@': get_current_loc(maze)}
-    all_keys = set()
-    for loc, v in maze.items():
-        if re_key.match(v):
-            items[v] = loc
-            all_keys.add(v)
-    # Next, find path lengths from each item to other items
-    for item, loc in items.items():
-        paths = find_key_paths(maze, loc)
-        for k, v in paths.items():
-            if k != item:
-                all_paths[(k,item)] = {}
-                all_paths[(k,item)]['steps'] = v['steps']
-                all_paths[(k,item)]['needs'] = [x.lower() for x in v['doors']]
-                all_paths[(item,k)] = all_paths[(k,item)]
-    util.pretty_print(all_paths)
-    return all_paths, all_keys
 
 
 def find_key_paths(maze, loc):
@@ -181,7 +154,7 @@ def test():
     """) == 86
     
     exit(0)
-# test()
+test()
 
 
 with open('input.txt', 'r') as f:
