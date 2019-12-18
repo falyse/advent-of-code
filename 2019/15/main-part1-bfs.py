@@ -5,45 +5,6 @@ from intcode import IntcodeComputer
 from collections import deque
 import util
 import operator
-import random
-
-random.seed(2)
-
-def change_dir(status_map, loc):
-    # If more than one is found, choose randomly
-    empty_dirs = search_for_empty(status_map, loc)
-    if len(empty_dirs) > 0:
-        i = random.randint(0, len(empty_dirs)-1)
-        return empty_dirs[i]
-    exit_dirs = search_for_exit(status_map, loc)
-    if len(exit_dirs) > 0:
-        i = random.randint(0, len(exit_dirs)-1)
-        return exit_dirs[i]
-
-
-def search_for_empty(status_map, loc):
-    empty = []
-    if not status_map.get(get_next_loc(loc, 1)):
-        empty.append(1)
-    if not status_map.get(get_next_loc(loc, 2)):
-        empty.append(2)
-    if not status_map.get(get_next_loc(loc, 3)):
-        empty.append(3)
-    if not status_map.get(get_next_loc(loc, 4)):
-        empty.append(4)
-    return empty
-
-def search_for_exit(status_map, loc):
-    exits = []
-    if status_map.get(get_next_loc(loc, 1)) == '.':
-        exits.append(1)
-    if status_map.get(get_next_loc(loc, 2)) == '.':
-        exits.append(2)
-    if status_map.get(get_next_loc(loc, 3)) == '.':
-        exits.append(3)
-    if status_map.get(get_next_loc(loc, 4)) == '.':
-        exits.append(4)
-    return exits
 
 
 def render(status_map, loc):
@@ -78,9 +39,8 @@ def get_next_loc(loc, dir):
 
 def test():
     pass
-
-
 test()
+
 
 with open('input.txt', 'r') as f:
     program_code = [int(x) for x in f.read().split(',')]
