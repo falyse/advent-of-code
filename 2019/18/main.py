@@ -25,7 +25,7 @@ def render(maze, loc):
     maze[loc] = '@'
     image = []
     x_vals, y_vals = zip(*maze.keys())
-    for y in reversed(range(min(y_vals), max(y_vals)+1)):
+    for y in range(min(y_vals), max(y_vals)+1):
         row = []
         for x in range(min(x_vals), max(x_vals)+1):
             value = maze.get((x, y))
@@ -71,49 +71,79 @@ def solve_maze(input):
     maze = text_to_maze(input)
     loc = get_current_loc(maze)
     maze[loc] = '.'
-    render(maze, loc)
 
-    # BFS to all letters
+    total_steps = 0
     keyring = set()
+    key_paths = find_key_paths(maze, loc)
+    while True:
+        render(maze, loc)
+        util.pretty_print(key_paths)
+        open_keys = [k for k,v in key_paths.items() if len(v['doors']) == 0]
+        print('Open keys:', open_keys)
+        if len(open_keys) == 0:
+            print('Total steps:', total_steps)
+            return total_steps
+        elif len(open_keys) == 1:
+            key = open_keys[0]
+            loc = key_paths[key]['loc']
+            total_steps += key_paths[key]['steps']
+            keyring.add(key)
+            print('Got key', key, ': total steps', total_steps)
+            clear_key_from_maze(maze, key)
+            key_paths = find_key_paths(maze, loc)
+        else:
+            print('Len > 1')
+            exit(1)
+
+
+def clear_key_from_maze(maze, key):
+    for loc,v in maze.items():
+        if v == key or v == key.upper():
+            maze[loc] = '.'
+
+
+def find_key_paths(maze, loc):
+    # BFS to find all the keys
+    maze = maze.copy()
+    key_paths = {}
     visited = set()
-    queue = [{'loc': loc, 'steps': 0}]
-    while maze_has_key(maze):
+    queue = [{'loc': loc, 'steps': 0, 'doors': []}]
+    while len(queue) > 0:
         current = queue.pop()
         loc = current['loc']
         if current['loc'] not in visited:
             visited.add(loc)
+            tile = maze[loc]
             steps = current['steps']
-            print('At loc', loc, 'in', steps, 'steps')
+            doors = list(current['doors'])
+
+            # print('At loc', loc, 'in', steps, 'steps')
+            if re_key.match(tile):
+                # print('  Found key', tile, 'at', steps, 'steps')
+                key_paths[tile] = {'loc': loc, 'steps': steps, 'doors': doors}
+            if re_door.match(tile):
+                # print('  Found door', tile, 'at', steps, 'steps')
+                doors.append(tile)
 
             for dir in get_open_dirs(maze, loc):
-                print('    Dir', dir)
+                # print('    Dir', dir)
                 move_loc = get_next_loc(loc, dir)
 
                 moved = True
-                if re_key.match(maze[loc]):
-                    print('  Found key', maze[loc], 'at', steps, 'steps')
-                    keyring.add(maze[loc])
-                if re_door.match(maze[loc]):
-                    print('  Found door', maze[loc], 'at', steps, 'steps')
-                    matching_key = maze[loc].lower()
-                    if matching_key in keyring:
-                        print('    unlocked!')
-                    else:
-                        print('    locked')
-                        moved = False
                 if moved:
-                    maze[loc] = '.'
-                    queue.append({'loc': move_loc, 'steps': steps+1})
+                    # maze[loc] = '.'
+                    queue.append({'loc': move_loc, 'steps': steps+1, 'doors': doors})
 
-            render(maze, loc)
+            # render(maze, loc)
+    return key_paths
 
 
 def test():
-#     assert solve_maze(r"""
-# #########
-# #b.A.@.a#
-# #########
-#     """) == 8
+    assert solve_maze(r"""
+#########
+#b.A.@.a#
+#########
+    """) == 8
 
     assert solve_maze(r"""
 ########################

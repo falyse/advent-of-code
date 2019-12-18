@@ -2,6 +2,7 @@ import re
 import typing
 import functools
 from operator import attrgetter
+import pprint
 
 PIXEL_BLACK = '█'
 PIXEL_LIGHT = '░'
@@ -186,3 +187,9 @@ def lcm(a, b):
 def lcmm(*args):
     """Return lcm of args."""
     return functools.reduce(lcm, args)
+
+
+# Util
+pp = pprint.PrettyPrinter(indent=4)
+def pretty_print(x):
+    pp.pprint(x)
