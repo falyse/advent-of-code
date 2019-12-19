@@ -1,7 +1,7 @@
 import re
 import typing
 import functools
-from operator import attrgetter
+import operator
 import pprint
 
 PIXEL_BLACK = '█'
@@ -47,7 +47,12 @@ def lmap(func, *iterables):
     return list(map(func, *iterables))
 
 def attribute_min_max(values, attribute):
-    return min(values, key=attrgetter(attribute)), max(values, key=attrgetter(attribute))
+    return min(values, key=operator.attrgetter(attribute)), max(values, key=operator.attrgetter(attribute))
+
+
+# Dict
+def sort_by_value(x):
+    return sorted(x.items(), key=operator.itemgetter(1))
 
 
 # Grid

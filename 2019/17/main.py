@@ -468,7 +468,7 @@ with open('input.txt', 'r') as f:
     assert dust_collected == 732985
 
     exit(0)
-    
+
     # Part 3 - More challenging scaffolding
     # https://www.reddit.com/r/adventofcode/comments/ebz338/2019_day_17_part_2_pathological_pathfinding/
     with open('pathological_pathfinding.txt', 'r') as f0:
