@@ -90,7 +90,7 @@ def walk_maze(maze, jumps, start_loc, end_loc):
             if loc in distance:
                 continue
             # print('Visit loc', loc)
-            render(maze, loc)
+            # render(maze, loc)
             distance[loc] = distance[h] + 1
             bfs.append(loc)
     print(distance)

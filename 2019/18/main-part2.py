@@ -1,7 +1,5 @@
 import sys
-sys.path.append('../intcode')
 sys.path.append('..')
-from intcode import IntcodeComputer
 import collections
 import util
 import operator
@@ -24,8 +22,7 @@ def get_dist(maze, loc, keyring=set()):
     if not len(cache) % 100:
         print('Cache len', len(cache), 'keyring', keyring)
 
-    # open_keys = get_open_keys(maze, loc, keyring)
-    open_keys = get_open_keys(maze, loc, keyring)
+    open_keys = get_open_keys(maze, keyring)
     # print('At loc', loc, 'open keys', open_keys)
     if len(open_keys) == 0:
         dist = 0
@@ -34,6 +31,7 @@ def get_dist(maze, loc, keyring=set()):
         for k,v in open_keys.items():
             key_dist = v[0]
             key_loc = v[1]
+            key_quad = v[2]
             # print('  check key', k)
             kr = keyring.copy()
             kr.add(k)
@@ -45,33 +43,12 @@ def get_dist(maze, loc, keyring=set()):
     return dist
 
 
-def get_open_keys_old(maze, loc, keyring):
-    # BFS to find shortest path from loc to all open keys
-    queue = [{'loc': loc, 'steps': 0}]
-    visited = set()
-    open_keys = {}
-    while len(queue) > 0:
-        current = queue.pop()
-        loc = current['loc']
-        if loc not in visited:
-            visited.add(loc)
-            steps = current['steps']
-            for dir in get_open_dirs(maze, loc):
-                move_loc = get_next_loc(loc, dir)
-                tile = maze[move_loc]
-                if tile.isupper() and tile.lower() not in keyring:
-                    continue
-                if tile.islower() and tile not in keyring:
-                    open_keys[tile] = steps+1, move_loc
-                else:
-                    queue.append({'loc': move_loc, 'steps': steps+1})
-    return open_keys
-
-
-
-def get_open_keys(maze, start_loc, keyring):
-    queue = collections.deque([start_loc])
-    distance = {start_loc: 0}
+def get_open_keys(maze, keyring):
+    start_locs = get_current_locs(maze)
+    queue = collections.deque(start_locs)
+    distance = {}
+    for start_loc in start_locs:
+        distance[start_loc] = 0
     open_keys = {}
     while queue:
         h = queue.popleft()
@@ -84,7 +61,7 @@ def get_open_keys(maze, start_loc, keyring):
             if tile.isupper() and tile.lower() not in keyring:
                 continue
             if tile.islower() and tile not in keyring:
-                open_keys[tile] = distance[loc], loc
+                open_keys[tile] = distance[loc], loc, quad
             else:
                 queue.append(loc)
     return open_keys
@@ -129,62 +106,58 @@ def text_to_maze(text):
 
 def test0():
     assert solve_maze(r"""
-    #########
-    #b.A.@.a#
-    #########
+#######
+#a.#Cd#
+##@#@##
+#######
+##@#@##
+#cB#.b#
+#######    
         """) == 8
     exit(0)
 
 def test1():
     assert solve_maze(r"""
-########################
-#f.D.E.e.C.b.A.@.a.B.c.#
-######################.#
-#d.....................#
-########################
-    """) == 86
+###############
+#d.ABC.#.....a#
+######@#@######
+###############
+######@#@######
+#b.....#.....c#
+###############
+    """) == 24
     exit(0)
 
 def test2():
     assert solve_maze(r"""
-########################
-#...............b.C.D.f#
-#.######################
-#.....@.a.B.c.d.A.e.F.g#
-########################
-    """) == 132
+#############
+#DcBa.#.GhKl#
+#.###@#@#I###
+#e#d#####j#k#
+###C#@#@###J#
+#fEbA.#.FgHi#
+#############
+    """) == 32
     exit(0)
 
 def test3():
     assert solve_maze(r"""
-#################
-#i.G..c...e..H.p#
-########.########
-#j.A..b...f..D.o#
-########@########
-#k.E..a...g..B.n#
-########.########
-#l.F..d...h..C.m#
-#################
-    """) == 136
+#############
+#g#f.D#..h#l#
+#F###e#E###.#
+#dCba@#@BcIJ#
+#############
+#nK.L@#@G...#
+#M###N#H###.#
+#o#m..#i#jk.#
+#############
+    """) == 72
     exit(0)
 
-def test4():
-    assert solve_maze(r"""
-########################
-#@..............ac.GI.b#
-###d#e#f################
-###A#B#C################
-###g#h#i################
-########################
-    """) == 81
-    exit(0)
-
-# test3()
+# test0()
 
 
 
-with open('input-part1.txt', 'r') as f:
+with open('input-part2.txt', 'r') as f:
     input = f.read()
     dist = solve_maze(input)
-    assert dist == 4954
