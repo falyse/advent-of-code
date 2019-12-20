@@ -66,9 +66,14 @@ def find_portals(maze):
     for pname, locs in portals.items():
         locs = list(locs)
         if len(locs) == 2:
-            jumps[locs[0]] = locs[1]
-            jumps[locs[1]] = locs[0]
+            jumps[locs[0]] = {'dst': locs[1], 'name': pname, 'used': False}
+            jumps[locs[1]] = {'dst': locs[0], 'name': pname, 'used': False}
     return portals, jumps
+
+def get_portal_from_loc(portals, loc):
+    for p,l in portals.items():
+        if loc in l:
+            return p
 
 
 def walk_maze(maze, jumps, start_loc, end_loc):
@@ -92,19 +97,22 @@ def walk_maze(maze, jumps, start_loc, end_loc):
                     take_jump = False
                 else:
                     take_jump = True
-                    loc = jumps[h]
+                    loc = jumps[h]['dst']
                     if is_outer(maze, h):
                         level -= 1
                     else:
                         level += 1
                     if level < 0:
                         take_jump = False
-                    if (jumps[h], level) in distance:
+                    if jumps[h]['used']:
+                        take_jump = False
+                    if (loc, level) in distance:
                         take_jump = False
                     if take_jump:
                         # print(distance)
-                        print('Portal from level', lh, h, 'to level', level, loc, is_outer(maze, h))
-                        distance[(h,level)] = distance[(h,lh)]
+                        print('Portal', jumps[h]['name'], 'from level', lh, h, 'to level', level, loc, is_outer(maze, h))
+                        # distance[(h,level)] = distance[(h,lh)]
+                        jumps[h]['used'] = True
                     else:
                         level = lh
             if not take_jump:
