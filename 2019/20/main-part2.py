@@ -61,7 +61,7 @@ def find_portals(maze):
                     if not pname in portals:
                         portals[pname] = set()
                     portals[pname].add(ploc)
-    print(portals)
+    util.pretty_print(portals)
     jumps = {}
     for pname, locs in portals.items():
         locs = list(locs)
@@ -71,48 +71,91 @@ def find_portals(maze):
     return portals, jumps
 
 
-def walk_maze(maze, jumps, start_loc, end_loc, level=0):
-    key = (start_loc, level)
-    bfs = collections.deque([key])
-    distance = {key: 0}
+def walk_maze_old(maze, jumps, start_loc, end_loc, start_level=0):
+    bfs = collections.deque([(start_loc, start_level)])
+    distance = {start_loc: 0}
     while bfs:
-        h, l = bfs.popleft()
-        lh = l
+        h, level = bfs.popleft()
         for dir in get_open_dirs(maze, h):
+            # print(h, level)
             if h == end_loc and level == 0:
-                print('Done at loc', h, 'dist', distance[(h, lh)])
-                return distance[(h, lh)]
+                print('Done at loc', h, 'dist', distance[h])
+                return distance[h]
             take_jump = False
-            if h in jumps and (jumps[h], lh+1) not in distance:
-                print('asdf', h, 'level', level, start_loc, end_loc)
+            if h in jumps and jumps[h] not in distance:
+                print('asdf0')
                 if level == 0 and h not in [start_loc, end_loc] and is_outer(maze, h):
                     take_jump = False
                 else:
                     take_jump = True
                     loc = jumps[h]
-                    print('Portal from level', l, h, 'to', loc)
-                    l += 1
+                    print('Portal from level', level, h, 'to', loc)
+                    if is_outer(maze, h):
+                        level -= 1
+                    else:
+                        level += 1
+                    if level < 0:
+                        take_jump = False
             if not take_jump:
                 if maze[h].isupper():
                     continue
                 loc = get_next_loc(h, dir)
-            if (loc, l) in distance:
+            if loc in distance:
                 continue
             # print('Visit loc', loc)
             # render(maze, loc)
-            distance[(loc,l)] = distance[(h,lh)] + 1
-            bfs.append((loc, l))
+            distance[loc] = distance[h] + 1
+            bfs.append((loc, level))
     print(distance)
-    return distance[(loc, l)]
+    return distance[loc]
+
+
+def walk_maze(maze, jumps, start_loc, end_loc):
+    key = (start_loc, 0)
+    bfs = collections.deque([key])
+    distance = {key: 0}
+    while bfs:
+        h, level = bfs.popleft()
+        lh = level
+        for dir in get_open_dirs(maze, h):
+            if h == end_loc and level == 0:
+                print('Done at loc', h, 'dist', distance[(h, level)])
+                return distance[(h, level)]
+            take_jump = False
+            if h in jumps and (jumps[h], level+1) not in distance:
+                if level == 0 and h not in [start_loc, end_loc] and is_outer(maze, h):
+                    take_jump = False
+                else:
+                    take_jump = True
+                    loc = jumps[h]
+                    print('Portal from level', level, h, 'to', loc)
+                    if is_outer(maze, h):
+                        level -= 1
+                    else:
+                        level += 1
+                    if level < 0:
+                        take_jump = False
+            if not take_jump:
+                if maze[h].isupper():
+                    continue
+                loc = get_next_loc(h, dir)
+            if (loc, level) in distance:
+                continue
+            # print('Visit loc', loc)
+            # render(maze, loc)
+            distance[(loc,level)] = distance[(h,lh)] + 1
+            bfs.append((loc, level))
+    print(distance)
+    return distance[(loc, level)]
 
 
 def is_outer(maze, h):
     x_max = max([loc[0] for loc in maze.keys()])
     y_max = max([loc[1] for loc in maze.keys()])
     # print('asdf', x_max, y_max)
-    if h[0] in [3, x_max-6]:
+    if h[0] in [0,1,2,3, x_max-6]:
         return True
-    if h[1] in [3, y_max-5]:
+    if h[1] in [0,1,2,3, y_max-5]:
         return True
     return False
 
