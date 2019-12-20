@@ -251,3 +251,4 @@ with open('input.txt', 'r') as f:
     input = f.read()
     dist = solve_maze(input)
     print('Final dist:', dist)
+    assert dist == 7186
