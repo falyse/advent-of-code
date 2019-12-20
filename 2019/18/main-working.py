@@ -2,7 +2,7 @@ import sys
 sys.path.append('../intcode')
 sys.path.append('..')
 from intcode import IntcodeComputer
-from collections import deque
+import collections
 import util
 import operator
 
@@ -21,9 +21,10 @@ def get_dist(maze, loc, keyring=set()):
     cache_key = loc, ''.join(sorted(keyring))
     if cache_key in cache:
         return cache[cache_key]
-    if len(cache) % 10:
+    if not len(cache) % 100:
         print('Cache len', len(cache), 'keyring', keyring)
 
+    # open_keys = get_open_keys(maze, loc, keyring)
     open_keys = get_open_keys(maze, loc, keyring)
     # print('At loc', loc, 'open keys', open_keys)
     if len(open_keys) == 0:
@@ -44,7 +45,7 @@ def get_dist(maze, loc, keyring=set()):
     return dist
 
 
-def get_open_keys(maze, loc, keyring):
+def get_open_keys_old(maze, loc, keyring):
     # BFS to find shortest path from loc to all open keys
     queue = [{'loc': loc, 'steps': 0}]
     visited = set()
@@ -64,6 +65,28 @@ def get_open_keys(maze, loc, keyring):
                     open_keys[tile] = steps+1, move_loc
                 else:
                     queue.append({'loc': move_loc, 'steps': steps+1})
+    return open_keys
+
+
+
+def get_open_keys(maze, start_loc, keyring):
+    queue = collections.deque([start_loc])
+    distance = {start_loc: 0}
+    open_keys = {}
+    while queue:
+        h = queue.popleft()
+        for dir in get_open_dirs(maze, h):
+            loc = get_next_loc(h, dir)
+            tile = maze[loc]
+            if loc in distance:
+                continue
+            distance[loc] = distance[h] + 1
+            if tile.isupper() and tile.lower() not in keyring:
+                continue
+            if tile.islower() and tile not in keyring:
+                open_keys[tile] = distance[loc], loc
+            else:
+                queue.append(loc)
     return open_keys
 
 
@@ -164,4 +187,5 @@ def test4():
 with open('input.txt', 'r') as f:
     input = f.read()
     dist = solve_maze(input)
+    assert dist == 4954
     # 4978 too high
