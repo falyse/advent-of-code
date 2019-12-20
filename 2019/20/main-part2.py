@@ -66,8 +66,8 @@ def find_portals(maze):
     for pname, locs in portals.items():
         locs = list(locs)
         if len(locs) == 2:
-            jumps[locs[0]] = {'dst': locs[1], 'name': pname, 'used': False}
-            jumps[locs[1]] = {'dst': locs[0], 'name': pname, 'used': False}
+            jumps[locs[0]] = {'dst': locs[1], 'name': pname, 'used': []}
+            jumps[locs[1]] = {'dst': locs[0], 'name': pname, 'used': []}
     return portals, jumps
 
 def get_portal_from_loc(portals, loc):
@@ -77,20 +77,24 @@ def get_portal_from_loc(portals, loc):
 
 
 def walk_maze(maze, jumps, start_loc, end_loc):
-    key = (start_loc, 0)
-    bfs = collections.deque([key])
+    jump_cnt = 0
+    key = (start_loc, 0, jump_cnt)
+    bfs = collections.deque([(start_loc, 0)])
     distance = {key: 0}
     while bfs:
         h, level = bfs.popleft()
         lh = level
-        # print('At level', lh, h)
-        if level > 10:
+        jc = jump_cnt
+        # if level == 1:
+        #     print('At level', lh, h)
+        if level > 100:
             continue
         for dir in get_open_dirs(maze, h):
             level = lh
+            jump_cnt = jc
             if h == end_loc and level == 0:
-                print('Done at loc', h, 'dist', distance[(h, level)])
-                return distance[(h, level)]
+                print('Done at loc', h, 'dist', distance[(h, level, jump_cnt)])
+                return distance[(h, level, jump_cnt)]
             take_jump = False
             if h in jumps:
                 if level == 0 and h not in [start_loc, end_loc] and is_outer(maze, h):
@@ -102,34 +106,39 @@ def walk_maze(maze, jumps, start_loc, end_loc):
                         level -= 1
                     else:
                         level += 1
+                    # print('     asdf0', level, loc, jump_cnt)
                     if level < 0:
                         take_jump = False
-                    if jumps[h]['used']:
+                        # print('     asdf1')
+                    if lh in jumps[h]['used']:
                         take_jump = False
-                    if (loc, level) in distance:
+                        # print('     asdf2')
+                    if (loc, level, jump_cnt) in distance:
                         take_jump = False
+                        # print('     asdf3')
                     if take_jump:
                         # print(distance)
                         print('Portal', jumps[h]['name'], 'from level', lh, h, 'to level', level, loc, is_outer(maze, h))
-                        # distance[(h,level)] = distance[(h,lh)]
-                        jumps[h]['used'] = True
+                        jumps[h]['used'].append(lh)
+                        jump_cnt += 1
+                        distance[(loc, level, jc)] = distance[(h, lh, jc)] + 1
                     else:
                         level = lh
             if not take_jump:
                 if maze[h].isupper():
                     continue
                 loc = get_next_loc(h, dir)
-            if (loc, level) in distance:
+            if (loc, level, jump_cnt) in distance:
                 continue
             # if level == 1:
             #     print('  dir', dir, 'loc', loc, 'lh', lh)
             # render(maze, loc)
-            distance[(loc,level)] = distance[(h,lh)] + 1
+            distance[(loc, level, jump_cnt)] = distance[(h, lh, jc)] + 1
             bfs.append((loc, level))
-            # if level == 1:
+            # if level == 3:
             #     print('  ', bfs)
     print(distance)
-    return distance[(loc, level)]
+    return distance[(loc, level, jump_cnt)]
 
 
 def is_outer(maze, h):
@@ -235,7 +244,7 @@ RE....#.#                           #......RF
     """) == 396
     exit(0)
 
-test1()
+# test1()
 
 
 with open('input.txt', 'r') as f:
