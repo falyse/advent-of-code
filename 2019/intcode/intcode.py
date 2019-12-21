@@ -8,6 +8,7 @@ class IntcodeComputer:
 
     def initialize(self, program, inputs):
         self.pc = 0
+        self.instr_cnt = 0
         self.relative_base = 0
         self.mem = program.copy()
         self.mem += [0] * 10000
@@ -28,6 +29,7 @@ class IntcodeComputer:
     def execute(self):
         trace = []
         while self.mem[self.pc] != 99:  # Halt
+            self.instr_cnt += 1
             if self.debug:
                 print('pc', self.pc, ':', self.mem[self.pc:self.pc+4])
             cmd = self.mem[self.pc]
