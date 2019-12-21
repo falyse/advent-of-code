@@ -40,26 +40,21 @@ def gen_script(cases):
     max_len = 15
     script = []
 
-    # (!A || !C) && D
-    script.append('NOT A J')
+    # (!A || !B || !C)
+    script.append('NOT A T')
+    script.append('OR T J')
+    script.append('NOT B T')
+    script.append('OR T J')
     script.append('NOT C T')
     script.append('OR T J')
+    # && D
     script.append('AND D J')
-    # && G
-    script.append('AND G J')
 
-    # || (!I && D && E && F)
-    script.append('NOT I T')
-    script.append('AND D T')
-    script.append('AND E T')
-    script.append('AND F T')
-    script.append('OR T J')
-
-    script.append('NOT G T')
-    script.append('AND D T')
-    # script.append('AND F T')
-    script.append('AND H T')
-    script.append('OR T J')
+    # && (E || H)
+    script.append('NOT E T')
+    script.append('NOT T T')
+    script.append('OR H T')
+    script.append('AND T J')
 
     assert len(script) <= max_len
 
@@ -76,21 +71,6 @@ def get_inputs(script):
     inputs = deque(util.flatten(inputs))
     return inputs
 
-
-# def gen_script(cases):
-#     print(cases)
-#     max_len = 15
-#     script = []
-#
-#     script.append('NOT C J')
-#     script.append('NOT D T')
-#     script.append('AND T J')
-#     # script.append('AND F J')
-#
-#     assert len(script) <= max_len
-#
-#     script.append('RUN')
-#     return script
 
 def extract_case(case_map):
     ground, jump_loc, fall_loc = parse_fall_output(case_map)
@@ -147,41 +127,32 @@ def merge(status_map):
                     case_map[(loc[0], loc[1]-y)] = char
     print('=================')
     render(case_map)
-    # print('=================')
     return case_map
-
-def test():
-    pass
-
-test()
 
 
 with open('input.txt', 'r') as f:
     program_code = [int(x) for x in f.read().split(',')]
     computer = IntcodeComputer(debug=False)
 
-    fell = True
     cases = []
-    while fell:
-        script = gen_script(cases)
-        print('Script:', script)
+    script = gen_script(cases)
+    print('Script:', script)
 
-        inputs = get_inputs(script)
-        print(inputs)
-        computer.run(program_code, inputs)
-        print(computer.outputs)
+    inputs = get_inputs(script)
+    print(inputs)
+    computer.run(program_code, inputs)
+    print(computer.outputs)
 
-        status_map = process_outputs(computer.outputs[:-1])
-        render(status_map)
-        fell = 'D' in status_map.values()
+    status_map = process_outputs(computer.outputs[:-1])
+    render(status_map)
+    fell = 'D' in status_map.values()
 
-        print('\nNum instructions:', computer.instr_cnt)
+    print('\nNum instructions:', computer.instr_cnt)
+    if fell:
         case_map = merge(status_map)
-        cases.append(extract_case(case_map))
-        # print('\n'.join([str(x) for x in cases]))
-        fell = False
-
-    damage_num = computer.outputs[-1]
-    print('Damage number:', damage_num)
-    # assert(damage_num) == 19357290
+        extract_case(case_map)
+    else:
+        damage_num = computer.outputs[-1]
+        print('Damage number:', damage_num)
+        assert(damage_num) == 1136394042
 
