@@ -38,36 +38,9 @@ def process_outputs(outputs):
 
 def gen_script():
     max_len = 15
-    T = False
-    J = False
     script = []
-    # script.append('NOT A J')  # hole at 1
 
-    # script.append('NOT A J')  # hole at 1
-    script.append('NOT D T')
-    script.append('NOT T J')  # no hole at 4
-    # script.append('AND T J')
-
-    # script.append('NOT B J')  # hole at 2
-    # script.append('NOT C T')
-    # script.append('NOT T T')  # no hole at 3
-    # script.append('AND T J')
-
-    # A || (B && !C)
-    # script.append('NOT A J')
-    # script.append('NOT B T')
-    # script.append('NOT T T')
-    # script.append('AND T J')
-    # script.append('NOT A T')
-    # script.append('NOT T T')
-    # script.append('OR T J')
-    # && !(ABCD)
-    # script.append('AND B T')
-    # script.append('AND C T')
-    # script.append('AND D T')
-    # script.append('NOT T T')
-    # script.append('AND T J')
-
+    # (!A || !C) &&_D
     script.append('NOT A J')
     script.append('NOT C T')
     script.append('OR T J')
