@@ -36,7 +36,6 @@ def shuffle(input, deck):
 
 def test():
     deck = [x for x in range(10)]
-    assert deck[7] == 7
 
     assert deal_new(deck) == util.ints('9 8 7 6 5 4 3 2 1 0')
     assert cut(deck, 3) == util.ints('3 4 5 6 7 8 9 0 1 2')
@@ -73,16 +72,18 @@ deal with increment 9
 deal with increment 3
 cut -1    
     """, deck) == util.ints('9 2 5 8 1 4 7 0 3 6')
+    exit(0)
 
-test()
+# test()
 
 
 with open('input.txt', 'r') as f:
     input = f.read()
     deck = [x for x in range(10007)]
+    print('starting deck')
+    print('  ', deck)
     deck = shuffle(input, deck)
-    card_index = 2018
-    print('Card at index', card_index, 'is', deck[card_index])
-    # 3201 too low
-    # 7058 too high
+    index = deck.index(2019)
+    print('Card 2019 is at index', index)
+    assert index == 6129
 
