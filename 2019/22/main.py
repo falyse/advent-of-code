@@ -3,62 +3,65 @@ sys.path.append('..')
 import util
 
 
-def deal_new(deck):
-    return list(reversed(deck))
+def deal_new(size, index):
+    return abs(size - index) - 1
 
-def cut(deck, n):
-    cut = deck[:n]
-    deck = deck[n:]
-    return deck + cut
+def cut(size, index, n):
+    return (index + n + size) % size
 
-def deal_inc(deck, n):
-    new = list(deck)
-    for i in range(len(deck)):
-        index = (n * i) % len(deck)
-        new[index] = deck[i]
-    return new
+def deal_inc(size, index, n):
+    t = index
+    # print('inc', n, size, t, ':', index)
+    while t % n:
+        t += size
+    index = t // n
+    # print('inc', n, size, t, ':', index)
+    return index
 
 
-def shuffle(input, deck):
-    for line in input.strip().splitlines():
+def shuffle(input, size, index):
+    for line in reversed(input.strip().splitlines()):
         if 'new' in line:
-            deck = deal_new(deck)
+            index = deal_new(size, index)
         if 'increment' in line:
             n = util.ints(line)[0]
-            deck = deal_inc(deck, n)
+            index = deal_inc(size, index, n)
         if 'cut' in line:
             n = util.ints(line)[0]
-            deck = cut(deck, n)
-        print(line)
-        print('  ', deck)
-    return deck
+            index = cut(size, index, n)
+        # print(line)
+        # print('  ', index)
+    return index
 
 
 def test():
-    deck = [x for x in range(10)]
+    size = 10
+    index = 2
 
-    assert deal_new(deck) == util.ints('9 8 7 6 5 4 3 2 1 0')
-    assert cut(deck, 3) == util.ints('3 4 5 6 7 8 9 0 1 2')
-    assert cut(deck, -4) == util.ints('6 7 8 9 0 1 2 3 4 5')
-    assert deal_inc(deck, 3) == util.ints('0 7 4 1 8 5 2 9 6 3')
+    assert deal_new(size, index) == 7
+    assert cut(size, index, 3) == 5
+    assert cut(size, index, -4) == 8
+    assert deal_inc(size, index, 3) == 4
+
+    assert deal_inc(100, 28, 32) == 4
 
     assert shuffle(r"""
 deal with increment 7
 deal into new stack
 deal into new stack
-    """, deck) == util.ints('0 3 6 9 2 5 8 1 4 7')
+    """, size, index) == 6
 
     assert shuffle(r"""
 cut 6
 deal with increment 7
 deal into new stack    
-    """, deck) == util.ints('3 0 7 4 1 8 5 2 9 6')
+    """, size, index) == 7
 
     assert shuffle(r"""
 deal with increment 7
 deal with increment 9
 cut -2    
-    """, deck) == util.ints('6 3 0 7 4 1 8 5 2 9')
+    """, size, index) == 0
 
     assert shuffle(r"""
 deal into new stack
@@ -71,19 +74,62 @@ cut 3
 deal with increment 9
 deal with increment 3
 cut -1    
-    """, deck) == util.ints('9 2 5 8 1 4 7 0 3 6')
+    """, size, index) == 5
+
+    assert shuffle(r"""
+deal into new stack
+cut -2
+deal with increment 7
+cut 8
+cut -4
+deal with increment 7
+cut 3
+deal with increment 9
+deal with increment 3
+cut -1    
+    """, size, 8) == 3
     exit(0)
 
 # test()
 
 
+def egcd(a, b):
+    if a == 0:
+        return (b, 0, 1)
+    else:
+        g, y, x = egcd(b % a, a)
+        return (g, x - (b // a) * y, y)
+
+def modinv(a, m):
+    g, x, y = egcd(a, m)
+    if g != 1:
+        raise Exception('modular inverse does not exist')
+    else:
+        return x % m
+
+
 with open('input.txt', 'r') as f:
     input = f.read()
-    deck = [x for x in range(10007)]
-    print('starting deck')
-    print('  ', deck)
-    deck = shuffle(input, deck)
-    index = deck.index(2019)
-    print('Card 2019 is at index', index)
-    assert index == 6129
+    # part 1
+    card = shuffle(input, 10007, 6129)
+    print('Card at index 6129 is', card)
+    assert card == 2019
 
+    # Part 2
+    # index = 2020
+    # for i in range(101741582076661):
+    #     if not i % 1000000:
+    #         print('Iteration', i)
+    #     index = shuffle(input, 119315717514047, index)
+    # print('Card at index 2020 is', index)
+
+    D = 119315717514047
+    X = 2020
+    Y = f(X)
+    Z = f(Y)
+    A = (Y-Z) * modinv(X-Y+D, D) % D
+    B = (Y-A*X) % D
+    print(A, B)
+    
+    n = 101741582076661
+    print((pow(A, n, D)*X + (pow(A, n, D)-1) * modinv(A-1, D) * B) % D)
