@@ -70,22 +70,20 @@ def num_surrounding(layers, layer, loc):
     for d in range(1, 5):
         next_loc = get_next_loc(loc, d)
         if next_loc == (2, 2):
-            if layer+1 not in layers:
-                continue
-            if loc == (2, 1):
-                num += num_row(layers, layer+1, 0)
-            if loc == (2, 3):
-                num += num_row(layers, layer+1, 4)
-            if loc == (1, 2):
-                num += num_col(layers, layer+1, 0)
-            if loc == (3, 2):
-                num += num_col(layers, layer+1, 4)
+            if layer+1 in layers:
+                if loc == (2, 1):
+                    num += num_row(layers, layer+1, 0)
+                if loc == (2, 3):
+                    num += num_row(layers, layer+1, 4)
+                if loc == (1, 2):
+                    num += num_col(layers, layer+1, 0)
+                if loc == (3, 2):
+                    num += num_col(layers, layer+1, 4)
         else:
             char = layers[layer].get(next_loc)
             if char is not None and char == '#':
                 num += 1
-    # At inner most layer
-    if layer+1 not in layers:
+    if layer-1 in layers:
         if loc[1] == 0:
             num += layers[layer-1][2, 1] == '#'
         if loc[1] == 4:
@@ -165,6 +163,39 @@ def test():
 ....#
 #####
     """)
+
+    assert sim_bugs_steps(start, 10) == text_to_layers(r"""
+.....
+.....
+.....
+.....
+.....
+    
+.....
+..#..
+...#.
+..#..
+.....,
+
+...#.
+.....
+.....
+...#.
+#...#,
+
+....#
+....#
+....#
+....#
+#####    
+
+.....
+.....
+.....
+.....
+.....
+    """)
+
     exit(0)
 
     assert sim_bugs_steps(start, 10) == text_to_grid(r"""
@@ -194,10 +225,16 @@ def test():
     assert sim_bugs(start) == 2129920
 
 
-test()
+# test()
 
 
 with open('input.txt', 'r') as f:
     input = f.read()
-    bio = sim_bugs(input)
-    assert bio == 18859569
+    layers = sim_bugs_steps(input, 200)
+    bug_cnt = 0
+    for tiles in layers.values():
+        for tile in tiles.values():
+            if tile == '#':
+                bug_cnt += 1
+    print('Bug count:', bug_cnt)
+
