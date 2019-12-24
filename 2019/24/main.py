@@ -2,6 +2,7 @@ import sys
 sys.path.append('..')
 import collections
 import operator
+import copy
 import util
 
 def text_to_grid(text):
@@ -13,6 +14,13 @@ def text_to_grid(text):
             loc = (loc[0] + 1, loc[1])
         loc = (0, loc[1] + 1)
     return grid
+
+def text_to_layers(text):
+    tile_text = text.split(',')
+    layers = {i-1: text_to_grid(x) for i, x in enumerate(tile_text)}
+    print(layers)
+    return layers
+
 
 def render(grid, loc=None):
     grid = grid.copy()
@@ -35,51 +43,75 @@ def render(grid, loc=None):
     return text
 
 
-def sim_bugs(input):
-    tiles = text_to_grid(input)
-    layouts = {}
-    while True:
-        new = tiles.copy()
-        for loc, tile in tiles.items():
-            if tile == '#' and num_surrounding(tiles, loc) != 1:
-                new[loc] = '.'
-            if tile == '.' and num_surrounding(tiles, loc) in [1, 2]:
-                new[loc] = '#'
-        tiles = new
-        text = render(tiles)
-        print()
-        if text in layouts:
-            print('Found repeated layout')
-            break
-        else:
-            layouts[text] = True
-    bio = calc_bio(tiles)
-    print('Bio calc:', bio)
-    return bio
-
-
 def sim_bugs_steps(input, steps=0):
-    tiles = text_to_grid(input)
+    layers = {0: text_to_grid(input)}
     if steps:
         for i in range(steps):
             print('Iteration', i)
-            new = tiles.copy()
-            for loc, tile in tiles.items():
-                if tile == '#' and num_surrounding(tiles, loc) != 1:
-                    new[loc] = '.'
-                if tile == '.' and num_surrounding(tiles, loc) in [1, 2]:
-                    new[loc] = '#'
-            render(new)
-            tiles = new
-    return new
+            layers[-i-1] = blank_tile()
+            layers[i+1] = blank_tile()
+            new = copy.deepcopy(layers)
+            for layer, tiles in layers.items():
+                for loc, tile in tiles.items():
+                    if tile == '#' and num_surrounding(layers, layer, loc) != 1:
+                        new[layer][loc] = '.'
+                    if tile == '.' and num_surrounding(layers, layer, loc) in [1, 2]:
+                        new[layer][loc] = '#'
+                new[layer][2, 2] = '.'
+            layers = new
 
-def num_surrounding(tiles, loc):
-    cnt = 0
+            for layer, tiles in sorted(layers.items()):
+                print('  Layer', layer)
+                render(tiles)
+    return layers
+
+def num_surrounding(layers, layer, loc):
+    num = 0
     for d in range(1, 5):
-        char = tiles.get(get_next_loc(loc, d))
-        if char is not None and char == '#':
-            cnt += 1
-    return cnt
+        next_loc = get_next_loc(loc, d)
+        if next_loc == (2, 2):
+            if layer+1 not in layers:
+                continue
+            if loc == (2, 1):
+                num += num_row(layers, layer+1, 0)
+            if loc == (2, 3):
+                num += num_row(layers, layer+1, 4)
+            if loc == (1, 2):
+                num += num_col(layers, layer+1, 0)
+            if loc == (3, 2):
+                num += num_col(layers, layer+1, 4)
+        else:
+            char = layers[layer].get(next_loc)
+            if char is not None and char == '#':
+                num += 1
+    # At inner most layer
+    if layer+1 not in layers:
+        if loc[1] == 0:
+            num += layers[layer-1][2, 1] == '#'
+        if loc[1] == 4:
+            num += layers[layer-1][2, 3] == '#'
+        if loc[0] == 0:
+            num += layers[layer-1][1, 2] == '#'
+        if loc[0] == 4:
+            num += layers[layer-1][3, 2] == '#'
+    return num
+
+def num_row(layers, layer, y):
+    num = sum([1 for loc, tile in layers[layer].items() if tile == '#' and loc[1] == y])
+    return num
+
+def num_col(layers, layer, x):
+    num = sum([1 for loc, tile in layers[layer].items() if tile == '#' and loc[0] == x])
+    return num
+
+def blank_tile():
+    return text_to_grid(r"""
+.....
+.....
+.....
+.....
+.....
+    """)
 
 def get_next_loc(loc, dir):
     moves = {1: (0,1),
@@ -114,12 +146,33 @@ def test():
 #....    
     """
 
-    assert sim_bugs_steps(start, 1) == text_to_grid(r"""
+    assert sim_bugs_steps(start, 1) == text_to_layers(r"""
+.....
+..#..
+...#.
+..#..
+.....,
+
 #..#.
 ####.
-###.#
+##..#
 ##.##
-.##..
+.##..,
+
+....#
+....#
+....#
+....#
+#####
+    """)
+    exit(0)
+
+    assert sim_bugs_steps(start, 10) == text_to_grid(r"""
+.#...
+.#.##
+.#...
+.....
+.....    
     """)
 
     assert sim_bugs_steps(start, 4) == text_to_grid(r"""
