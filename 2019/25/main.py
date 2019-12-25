@@ -168,3 +168,10 @@ with open('input.txt', 'r') as f:
             if 'ejected back to the checkpoint' not in text:
                 print(text)
                 exit(0)
+
+
+# Items in your inventory:
+# - hypercube
+# - festive hat
+# - shell
+# - astronaut ice cream
