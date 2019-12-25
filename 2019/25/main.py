@@ -4,8 +4,9 @@ sys.path.append('..')
 from intcode import IntcodeComputer
 from collections import deque
 import util
+from itertools import combinations
 
-def render(status_map):
+def render(status_map, display=True):
     smap = status_map.copy()
     image = []
     x_vals, y_vals = zip(*smap.keys())
@@ -21,7 +22,9 @@ def render(status_map):
             row.append(char)
         image.append(''.join(row))
     text = '\n'.join(image)
-    print(text)
+    if display:
+        print(text)
+    return text
 
 def process_outputs(outputs):
     status_map = {}
@@ -44,9 +47,59 @@ def get_inputs(script):
     inputs = deque(util.flatten(inputs))
     return inputs
 
-def get_cmds():
+def gather_items_cmds():
     cmds = []
-    cmds.append('east') # south, west
+    cmds.append('west')
+    # Holodeck
+    cmds.append('take hypercube')
+    # cmds.append('south')
+    # Corridor
+    cmds.append('west')
+    # Stables
+    cmds.append('take space law space brochure')
+    cmds.append('west')
+    # Sick Bay
+    # cmds.append('take infinite loop')
+    # cmds.append('west')
+    # Navigation
+    # cmds.append('take escape pod')
+    cmds.append('north')
+    # Gift wrapping center
+    cmds.append('take shell')
+    cmds.append('west')
+    # Engineering
+    cmds.append('take mug')
+    cmds.append('south')
+    # Kitchen
+    cmds.append('take festive hat')
+
+    # Backtrack to Hull Breach
+    cmds.append('north')
+    cmds.append('east')
+    cmds.append('south')
+    cmds.append('east')
+    cmds.append('east')
+    cmds.append('east')
+
+    cmds.append('south')
+    # Hallway
+    cmds.append('east')
+    # Passages
+    cmds.append('take boulder')
+    cmds.append('west')
+    # Hallway
+    cmds.append('west')
+    # Observatory
+    # cmds.append('take molten lava')
+    # cmds.append('drop boulder')
+
+    # Backtrack to Hull Breach
+    cmds.append('east')
+    cmds.append('east')
+    cmds.append('west')
+    cmds.append('north')
+
+    cmds.append('east')
     # Crew Quarters
     # cmds.append('take photons')
     cmds.append('north')
@@ -63,16 +116,55 @@ def get_cmds():
     # Hot Chocolate Fountain
     cmds.append('take astronaut ice cream')
     cmds.append('south')
-    # Security Checkpoint
-    cmds.append('south')  # too heavy
+
+    return cmds
+
+def get_item_cmds(all_items, held_items):
+    cmds = []
+    for item in all_items:
+        if item in held_items:
+            cmds.append('take %s' % item)
+        else:
+            cmds.append('drop %s' % item)
+    cmds.append('inv')
+    cmds.append('south')
     return cmds
 
 
 with open('input.txt', 'r') as f:
     program_code = [int(x) for x in f.read().split(',')]
     computer = IntcodeComputer(debug=False)
-    cmds = get_cmds()
+
+    cmds = gather_items_cmds()
     inputs = get_inputs(cmds)
     computer.run(program_code, inputs)
-    status_map = process_outputs(computer.outputs)
-    render(status_map)
+
+    items = [
+        'boulder',
+        'shell',
+        'mug',
+        'hypercube',
+        'space law space brochure',
+        'festive hat',
+        'astronaut ice cream',
+        'whirled peas']
+
+    for i in reversed(range(1,8)):
+        print('\nTesting 8 choose', i, '\n')
+        combos = combinations(items, i)
+        for combo in list(combos):
+            print('Combo:', combo)
+            cmds = get_item_cmds(items, combo)
+            inputs.clear()
+            inputs.extend(get_inputs(cmds))
+            computer.reset_outputs()
+            computer.execute()
+            status_map = process_outputs(computer.outputs)
+            text = render(status_map, False)
+            if 'lighter' in text:
+                print('  lighter')
+            if 'heavier' in text:
+                print('  heavier')
+            if 'ejected back to the checkpoint' not in text:
+                print(text)
+                exit(0)
