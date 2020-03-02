@@ -2,6 +2,7 @@ import re
 import typing
 import functools
 import operator
+import hashlib
 import pprint
 
 PIXEL_BLACK = '█'
@@ -51,8 +52,11 @@ def attribute_min_max(values, attribute):
 
 
 # Dict
-def sort_by_value(x):
-    return sorted(x.items(), key=operator.itemgetter(1))
+def sort_by_value(d, reverse=False):
+    return sorted(d.items(), key=operator.itemgetter(1), reverse=reverse)
+
+def sort_by_value_then_key(d, reverse=False):
+    return sorted(d.items(), key=lambda x: (x[1], x[0]), reverse=reverse)
 
 
 # Grid
@@ -177,6 +181,11 @@ def shortest_path(graph, start, goal):
     except StopIteration:
         return None
 
+# Encryption
+def md5_hash(input):
+    m = hashlib.md5()
+    m.update(input.encode('utf-8'))
+    return m.hexdigest()
 
 # Math
 def gcd(a, b):

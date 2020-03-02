@@ -10,5 +10,4 @@ test()
 
 
 with open('input.txt', 'r') as f:
-    input = f.readlines()
-
+    input = f.read().strip().splitlines()
