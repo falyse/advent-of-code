@@ -58,6 +58,12 @@ def sort_by_value(d, reverse=False):
 def sort_by_value_then_key(d, reverse=False):
     return sorted(d.items(), key=lambda x: (x[1], x[0]), reverse=reverse)
 
+def key_with_min_value(d):
+    return min(d.items(), key=operator.itemgetter(1))[0]
+
+def key_with_max_value(d):
+    return max(d.items(), key=operator.itemgetter(1))[0]
+
 
 # Grid
 def text_to_grid(text, map):
