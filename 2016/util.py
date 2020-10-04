@@ -50,6 +50,13 @@ def lmap(func, *iterables):
 def attribute_min_max(values, attribute):
     return min(values, key=operator.attrgetter(attribute)), max(values, key=operator.attrgetter(attribute))
 
+def rotate_list(values, shift, dir='left'):
+    if dir == 'right':
+        values = values[-1*shift:] + values[:-1*shift]
+    else:
+        values = values[shift:] + values[:shift]
+    return values
+
 
 # Dict
 def sort_by_value(d, reverse=False):
@@ -66,13 +73,20 @@ def key_with_max_value(d):
 
 
 # Grid
-def text_to_grid(text, map):
+def make_grid(*dimensions: typing.List[int], fill=None):
+    """Returns a grid such that 'dimensions' is just out of bounds"""
+    if len(dimensions) == 1:
+        return [fill for _ in range(dimensions[0])]
+    next_down = make_grid(*dimensions[1:], fill=fill)
+    return [list(next_down) for _ in range(dimensions[0])]
+
+def text_to_grid(text, map={}):
     grid = [[x for x in line.strip()] for line in text.split('\n')]
     if map.keys():
         grid = grid_map(grid, map)
     return grid
 
-def grid_to_text(grid, map):
+def grid_to_text(grid, map={}):
     if map.keys():
         grid = grid_map(grid, map)
     return '\n'.join([''.join([x for x in line]) for line in grid])
@@ -83,15 +97,12 @@ def grid_min_max(grid):
 def grid_map(grid, map={}):
     return [[map[x] if x in map.keys() else x for x in y] for y in grid]
 
-def make_grid(*dimensions: typing.List[int], fill=None):
-    """Returns a grid such that 'dimensions' is just out of bounds"""
-    if len(dimensions) == 1:
-        return [fill for _ in range(dimensions[0])]
-    next_down = make_grid(*dimensions[1:], fill=fill)
-    return [list(next_down) for _ in range(dimensions[0])]
-
-def flatten(grid):
+def flatten_grid(grid):
     return [i for x in grid for i in x]
+
+def grid_count(grid, value):
+    flat = flatten_grid(grid)
+    return flat.count(value)
 
 
 # Algorithms
