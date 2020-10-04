@@ -1,5 +1,5 @@
 import sys
-sys.path.append('..')
+sys.path.append('../..')
 import util
 
 KEY_MAP1 = {(0, 0): '1',
