@@ -33,7 +33,7 @@ def process(input):
                 in_marker = False
                 marker = ''
 
-    print(data)
+    # print(data)
 
     output = ''
     num_chars = -1
@@ -54,8 +54,15 @@ def process(input):
         else:
             output += x
 
-    print(output)
-    print()
+    # print(output)
+    # print()
+    return output
+
+
+def recursive_process(input):
+    output = input
+    while '(' in output:
+        output = process(output)
     return output
 
 
@@ -68,10 +75,21 @@ def test():
     assert(process('X(8x2)(3x3)ABCY') == 'X(3x3)ABC(3x3)ABCY')
     exit(0)
 
+def test2():
+    assert(recursive_process('(3x3)XYZ') == 'XYZXYZXYZ')
+    assert(recursive_process('X(8x2)(3x3)ABCY') == 'XABCABCABCABCABCABCY')
+    assert(len(recursive_process('(27x12)(20x12)(13x14)(7x10)(1x12)A')) == 241920)
+    assert(len(recursive_process('(25x3)(3x3)ABC(2x3)XY(5x2)PQRSTX(18x9)(3x2)TWO(5x7)SEVEN')) == 445)
+    exit(0)
+
 # test()
+test2()
 
 
 with open('input.txt', 'r') as f:
     input = f.read().strip()
     output = process(input)
-    print(len(output))
+    print('Part 1', len(output))
+
+    output = recursive_process(input)
+    print('Part 2', len(output))
