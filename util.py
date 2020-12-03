@@ -227,8 +227,11 @@ def coord_move(loc, dir, num_steps=1):
                   'E': (num_steps, 0),
                   'W': (-1*num_steps, 0)}
     delta = dir_deltas[dir]
-    next_loc = tuple(map(operator.add, loc, delta))
+    next_loc = tuple_add(loc, delta)
     return next_loc
+
+def tuple_add(tuple0, tuple1):
+    return tuple(map(operator.add, tuple0, tuple1))
 
 def coord_turn(current_dir, turn_dir):
     if turn_dir in ['L', 'l', 'left']:
