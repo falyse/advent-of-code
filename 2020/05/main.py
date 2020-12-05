@@ -28,14 +28,8 @@ test()
 
 with open('input.txt', 'r') as f:
     input = f.read().strip().splitlines()
-    max_id = 0
-    ids = []
-    for seat in input:
-        seat_id = get_seat_id(seat)
-        ids.append(seat_id)
-        if seat_id > max_id:
-            max_id = seat_id
-    print('Part 1:', max_id)
+    ids = [get_seat_id(x) for x in input]
+    print('Part 1:', max(ids))
 
     ids = sorted(ids)
     for i, seat_id in enumerate(ids):

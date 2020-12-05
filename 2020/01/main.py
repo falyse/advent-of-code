@@ -1,27 +1,24 @@
 import sys
 sys.path.append('../..')
 import util
+import itertools
+import numpy
 
-def process_part1(input):
-    for x in input:
-        for y in input:
-            if x != y and x+y == 2020:
-                return x*y
 
-def process_part2(input):
-    for x in input:
-        for y in input:
-            for z in input:
-                if x != y and x != z and y != z and x+y+z == 2020:
-                    return x*y*z
+def check_combos(input, num_selected):
+    for nums in itertools.combinations(input, num_selected):
+        if sum(nums) == 2020:
+            return numpy.prod(nums)
 
 
 with open('input.txt', 'r') as f:
     input = f.read().strip().splitlines()
     input = list(map(int, input))
 
-    result = process_part1(input)
+    result = check_combos(input, 2)
     print('Part 1', result)
+    assert(result == 902451)
 
-    result = process_part2(input)
+    result = check_combos(input, 3)
     print('Part 2', result)
+    assert(result == 85555470)
