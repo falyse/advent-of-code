@@ -1,8 +1,8 @@
 import sys
 sys.path.append('../..')
 import util
-import math
 
+cache = {}
 
 def connect_all(input):
     adapters = util.ints(input)
@@ -24,68 +24,28 @@ def connect_all(input):
 
 def num_arrangements(input):
     adapters = util.ints(input)
-    adapters.append(max(adapters) + 3)
+    adapters = adapters + [max(adapters) + 3]
     adapters = sorted(adapters)
+    print(adapters)
 
-    num_valid = []
-    source = 0
-    i = 0
-    while i < len(adapters):
-        adapter = adapters[i]
-        num = 0
-        last_source = source
-        for j in range(1,4):
-            test_adapter = last_source + j
-            if test_adapter in adapters:
-                num += 1
-                source = test_adapter
-                i = adapters.index(test_adapter) + 1
-        num_valid.append(num)
-    print(num_valid)
+    global cache
+    cache = {}
+    num_paths = get_valid_paths(adapters, 0)
+    print('total', num_paths)
+    return num_paths
 
-    # total = sum([math.factorial(x) for x in num_valid])
-    total = 0
-    for n in num_valid:
-        if n > 1:
-            total += math.factorial(n)
-    print(total)
-    return total
 
-    # total = 0
-    # group = 1
-    # for num in num_valid:
-    #     if num > 1:
-    #         group = group * num
-    #     if num == 1:
-    #         if group > 1:
-    #             total += group
-    #         group = 1
-    # print('total', total)
-
-    return num_valid
-    exit(0)
-
-    num_variants = 1
-    source = 0
-    visited = set()
-    for adapter in adapters:
-        print(adapter)
-        if adapter in visited:
-            print('  vis', adapter)
-            continue
-        num_valid = 0
-        for i in range(1,4):
-            # print(source, '->', i, source+i)
-            if source + i in adapters:
-                num_valid += 1
-                visited.add(source + i)
-        print(source, '->', num_valid, ':', visited)
-        source = adapter
-        visited.add(adapter)
-        if num_valid > 1:
-            num_variants += num_valid
-    print(num_variants)
-    # return num_variants
+def get_valid_paths(adapters, start):
+    if start in cache:
+        return cache[start]
+    if start == adapters[-1]:
+        return 1
+    num = 0
+    for j in range(1,4):
+        if start+j in adapters:
+            num += get_valid_paths(adapters, start+j)
+    cache[start] = num
+    return num
 
 
 def test():
@@ -148,3 +108,5 @@ with open('input.txt', 'r') as f:
     input = f.read()
     deltas = connect_all(input)
     print('Part 1:', deltas[1] * deltas[3])
+    num_paths = num_arrangements(input)
+    print('Part 2:', num_paths)
