@@ -4,6 +4,7 @@ import functools
 import operator
 import hashlib
 import pprint
+import math
 
 PIXEL_BLACK = '█'
 PIXEL_LIGHT = '░'
@@ -103,6 +104,56 @@ def flatten_grid(grid):
 def grid_count(grid, value):
     flat = flatten_grid(grid)
     return flat.count(value)
+
+def grid_count_adjacent(grid, loc, value, include_loc=False):
+    x, y = loc
+    cnt = 0
+    for dy in range(-1,2):
+        for dx in range(-1,2):
+            y_test = y + dy
+            x_test = x + dx
+            if not include_loc and (x_test, y_test) == loc:
+                continue
+            if (y_test >= 0 and y_test < len(grid) and
+                x_test >= 0 and x_test < len(grid[y])):
+                if grid[y_test][x_test] == value:
+                    cnt += 1
+    return cnt
+
+def grid_count_visible(grid, loc, value, blockers=[], valid_angles=None):
+    '''Count the number of "value" items in the grid in direct line of sight from "loc"
+       The "blockers" list can be used to add other items that block line of sight
+       The "valid_angles" list can be used to only allow matches at certain angles'''
+    search_list = [value] + blockers
+    matches = []
+    all_angles = set()
+    # First, calculate the distance and angle to all other matching points in the grid
+    for y_test, row in enumerate(grid):
+        for x_test, val in enumerate(row):
+            if (x_test, y_test) == loc:
+                continue
+            if val in search_list:
+                dist, angle = get_path_between_points(loc, (x_test, y_test))
+                if valid_angles is None or angle in valid_angles:
+                    matches.append((dist, angle, val))
+                    all_angles.add(angle)
+    # Then, discard any match that is not visible due to a closer blocker at the same angle
+    cnt = 0
+    for angle in all_angles:
+        matching_angle = sorted([x for x in matches if x[1] == angle])
+        closest = matching_angle[0]
+        if closest[2] == value:
+            cnt += 1
+    return cnt
+
+
+def get_path_between_points(coord0, coord1):
+    dx = coord1[0] - coord0[0]
+    dy = coord1[1] - coord0[1]
+    dist = dx**2 + dy**2
+    angle = math.atan2(-1*dy, dx) * 180/math.pi
+    angle = (90 - angle) % 360  # Convert to clockwise angle
+    return dist, angle
 
 
 # Algorithms
