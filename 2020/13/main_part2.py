@@ -6,33 +6,35 @@ import util
 def process(input):
     constraints = [None if b == 'x' else int(b) for b in input.split(',')]
     print(constraints)
-    max_bus = max(util.ints(input))
-    max_i = constraints.index(max_bus)
-    print('max', max_bus, max_i)
-    t = max_bus - max_i
+    first_bus = constraints[0]
+    t = first_bus
+    incr = first_bus
+    matched_i = 0
     while True:
         ok = True
-        # print(t)
+        print(t)
         for i, bus in enumerate(constraints):
             if bus is None:
                 continue
             if (t+i) % bus:
                 ok = False
                 break
+            elif i > matched_i:
+                incr *= bus
+                matched_i = i
+        # print('  matched_i', matched_i, 'incr', incr)
         if ok:
             print('Success at t', t)
             return t
-        t += max_bus
+        t += incr
 
 
 def test():
-    util.extended_gcd(17, 13)
-    exit(0)
     assert(process('17,x,13,19') == 3417)
-    # assert(process('7,13,x,x,59,x,31,19') == 1068781)
+    assert(process('7,13,x,x,59,x,31,19') == 1068781)
     exit(0)
 
-test()
+# test()
 
 
 with open('input.txt', 'r') as f:
