@@ -299,6 +299,9 @@ def coord_move(loc, dir, num_steps=1):
 def tuple_add(tuple0, tuple1):
     return tuple(map(operator.add, tuple0, tuple1))
 
+def tuple_sub(tuple0, tuple1):
+    return tuple(map(operator.sub, tuple0, tuple1))
+
 def coord_turn(current_dir, turn_dir):
     if turn_dir in ['L', 'l', 'left']:
         turn = {'N': 'W',
