@@ -4,6 +4,7 @@ import util
 
 
 def process(input):
+    lines = input.strip().splitlines()
     return
 
 
