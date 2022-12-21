@@ -20,3 +20,4 @@ with open('input.txt', 'r') as f:
     input = f.read()
     val = process(input)
     print('Part 1:', val)
+    # assert(val == )

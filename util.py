@@ -87,10 +87,37 @@ def text_to_grid(text, map={}):
         grid = grid_map(grid, map)
     return grid
 
+def text_to_grid_dict(text, map={}):
+    grid = {}
+    for y, line in enumerate(text.split('\n')):
+        for x, value in enumerate(line.strip()):
+            if value in map.keys():
+                value = map[value]
+            grid[(x, y)] = value
+    return grid
+
 def grid_to_text(grid, map={}):
     if map.keys():
         grid = grid_map(grid, map)
     return '\n'.join([''.join([x for x in line]) for line in grid])
+
+def grid_dict_to_text(grid, map={}):
+    min = max = (None, None)
+    for (x, y), value in grid.items():
+        if min[0] is None:
+            min = max = (x, y)
+        if x < min[0]:
+            min = (x, min[1])
+        if x > max[0]:
+            max = (x, max[1])
+        if y < min[1]:
+            min[1] = y
+            min = (min[0], y)
+        if y > max[1]:
+            max = (max[0], y)
+        if value in map.keys():
+            value = map[value]
+    return '\n'.join([''.join(grid[(x, y)] for x in range(min[0], max[0]+1)) for y in range(min[1], max[1]+1)])
 
 def grid_min_max(grid):
     return min(map(min, grid)), max(map(max, grid))
@@ -145,6 +172,16 @@ def grid_count_visible(grid, loc, value, blockers=[], valid_angles=None):
         if closest[2] == value:
             cnt += 1
     return cnt
+
+def grid_locate_item(grid, search_value):
+    for y, row in enumerate(grid):
+        for x, item in enumerate(row):
+            if item == search_value:
+                return (x, y)
+    return None
+
+def grid_dict_locate_item(grid, search_value):
+    return [loc for loc, value in grid.items() if value == search_value][0]
 
 
 def get_path_between_points(coord0, coord1):
