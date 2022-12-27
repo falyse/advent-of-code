@@ -101,7 +101,8 @@ def grid_to_text(grid, map={}):
         grid = grid_map(grid, map)
     return '\n'.join([''.join([x for x in line]) for line in grid])
 
-def grid_dict_to_text(grid, map={}):
+def grid_dict_to_text(grid, map={}, empty_fill_char=None):
+    grid = grid.copy()
     min = max = (None, None)
     for (x, y), value in grid.items():
         if min[0] is None:
@@ -111,12 +112,16 @@ def grid_dict_to_text(grid, map={}):
         if x > max[0]:
             max = (x, max[1])
         if y < min[1]:
-            min[1] = y
             min = (min[0], y)
         if y > max[1]:
             max = (max[0], y)
         if value in map.keys():
             value = map[value]
+    if empty_fill_char is not None:
+        for y in range(min[1], max[1]+1):
+            for x in range(min[0], max[0]+1):
+                if (x, y) not in grid:
+                    grid[(x, y)] = empty_fill_char
     return '\n'.join([''.join(grid[(x, y)] for x in range(min[0], max[0]+1)) for y in range(min[1], max[1]+1)])
 
 def grid_min_max(grid):
