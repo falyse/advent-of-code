@@ -103,6 +103,18 @@ def grid_to_text(grid, map={}):
 
 def grid_dict_to_text(grid, map={}, empty_fill_char=None):
     grid = grid.copy()
+    min, max = grid_dict_coord_range(grid)
+    for (x, y), value in grid.items():
+        if value in map.keys():
+            value = map[value]
+    if empty_fill_char is not None:
+        for y in range(min[1], max[1]+1):
+            for x in range(min[0], max[0]+1):
+                if (x, y) not in grid:
+                    grid[(x, y)] = empty_fill_char
+    return '\n'.join([''.join(grid[(x, y)] for x in range(min[0], max[0]+1)) for y in range(min[1], max[1]+1)])
+
+def grid_dict_coord_range(grid):
     min = max = (None, None)
     for (x, y), value in grid.items():
         if min[0] is None:
@@ -115,14 +127,7 @@ def grid_dict_to_text(grid, map={}, empty_fill_char=None):
             min = (min[0], y)
         if y > max[1]:
             max = (max[0], y)
-        if value in map.keys():
-            value = map[value]
-    if empty_fill_char is not None:
-        for y in range(min[1], max[1]+1):
-            for x in range(min[0], max[0]+1):
-                if (x, y) not in grid:
-                    grid[(x, y)] = empty_fill_char
-    return '\n'.join([''.join(grid[(x, y)] for x in range(min[0], max[0]+1)) for y in range(min[1], max[1]+1)])
+    return min, max
 
 def grid_min_max(grid):
     return min(map(min, grid)), max(map(max, grid))
