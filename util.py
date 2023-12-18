@@ -407,9 +407,10 @@ def get_open_dirs(grid, loc):
     return opens
 
 
-def render_grid(grid, loc):
+def render_grid(grid, loc=None):
     grid = grid.copy()
-    grid[loc] = '*'
+    if loc is not None:
+        grid[loc] = '*'
     print(grid_dict_to_text(grid))
 
 

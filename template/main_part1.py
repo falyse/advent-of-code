@@ -14,10 +14,10 @@ def test():
     assert(process(test_input) == )
 
 test()
+# exit(0)
 
 
 with open('input.txt', 'r') as f:
     input = f.read()
     val = process(input)
-    print('Part 1:', val)
-    # assert(val == )
+    print('Result:', val)
