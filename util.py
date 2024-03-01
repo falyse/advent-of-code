@@ -117,6 +117,12 @@ def grid_dict_to_text(grid, map={}, empty_fill_char=None):
                     grid[(x, y)] = empty_fill_char
     return '\n'.join([''.join(grid[(x, y)] for x in range(min[0], max[0]+1)) for y in range(min[1], max[1]+1)])
 
+def render_grid(grid, loc=None):
+    grid = grid.copy()
+    if loc is not None:
+        grid[loc] = '*'
+    print(grid_dict_to_text(grid))
+
 def grid_dict_coord_range(grid):
     min = max = (None, None)
     for (x, y), value in grid.items():
@@ -186,6 +192,7 @@ def grid_count_visible(grid, loc, value, blockers=[], valid_angles=None):
             cnt += 1
     return cnt
 
+
 def grid_locate_item(grid, search_value):
     for y, row in enumerate(grid):
         for x, item in enumerate(row):
@@ -193,8 +200,59 @@ def grid_locate_item(grid, search_value):
                 return (x, y)
     return None
 
+
 def grid_dict_locate_item(grid, search_value):
     return [loc for loc, value in grid.items() if value == search_value][0]
+
+
+# Coordinate system movement
+def coord_move(loc, dir, num_steps=1):
+    dir_deltas = {'N': (0, num_steps),
+                  'S': (0, -1*num_steps),
+                  'E': (num_steps, 0),
+                  'W': (-1*num_steps, 0)}
+    delta = dir_deltas[dir]
+    next_loc = tuple_add(loc, delta)
+    return next_loc
+
+def tuple_add(tuple0, tuple1):
+    return tuple(map(operator.add, tuple0, tuple1))
+
+def tuple_sub(tuple0, tuple1):
+    return tuple(map(operator.sub, tuple0, tuple1))
+
+def coord_turn(current_dir, turn_dir):
+    if turn_dir in ['L', 'l', 'left']:
+        turn = {'N': 'W',
+                'S': 'E',
+                'E': 'N',
+                'W': 'S'}
+    if turn_dir in ['R', 'r', 'right']:
+        turn = {'W': 'N',
+                'E': 'S',
+                'N': 'E',
+                'S': 'W'}
+    if turn_dir in ['reverse']:
+        turn = {'N': 'S',
+                'S': 'N',
+                'E': 'W',
+                'W': 'E'}
+    return turn[current_dir]
+
+
+def get_open_dirs(grid, loc, blockers=[], retval='dir'):
+    opens = []
+    for dir in ['N', 'S', 'E', 'W']:
+        next_loc = coord_move(loc, dir)
+        val = grid.get(next_loc)
+        if val is not None and val not in blockers:
+            if retval == 'dir':
+                opens.append(dir)
+            elif retval == 'loc':
+                opens.append(next_loc)
+            elif retval == 'val':
+                opens.append(val)
+    return opens
 
 
 def get_path_between_points(coord0, coord1):
@@ -204,6 +262,91 @@ def get_path_between_points(coord0, coord1):
     angle = math.atan2(-1*dy, dx) * 180/math.pi
     angle = (90 - angle) % 360  # Convert to clockwise angle
     return dist, angle
+
+
+def taxi_distance(loc, origin=(0, 0)):
+    diff = tuple(map(operator.sub, loc, origin))
+    return abs(diff[0]) + abs(diff[1])
+
+
+def find_valid_paths(grid, loc_s, loc_e, debug=False):
+    '''BFS to find all valid paths from start to end location'''
+    paths = []
+    visited = {}
+    queue = [{'loc': loc_s, 'steps': 0}]
+    while len(queue) > 0:
+        current = queue.pop()
+        loc = current['loc']
+        steps = current['steps']
+        if loc not in visited or visited[loc] > steps:
+            visited[loc] = steps
+
+            if debug:
+                print('At loc', loc, 'in', steps, 'steps')
+                render_grid(grid, loc)
+
+            if loc == loc_e:
+                if debug:
+                    print('  Found end', loc_e, 'at', steps, 'steps')
+                paths.append(steps)
+            else:
+                for dir in get_open_dirs(grid, loc):
+                    if debug:
+                        print('    Dir', dir)
+                    move_loc = coord_move(loc, dir)
+                    queue.append({'loc': move_loc, 'steps': steps+1})
+    return paths
+
+
+def find_grid_path_costs(grid, loc_s, debug=False):
+    '''
+    Dijkstra's algorithm to find the best costs between start location and all other nodes in the grid
+    Returns a dict with {loc: lowest_cost_from_loc_s}
+    https://pythonalgos.com/2022/08/17/dijkstras-algorithm-in-5-steps-with-python
+    '''
+    costs = {
+        loc_s: 0
+    }
+    priority_queue = [(0, loc_s)]  # (cost, loc) tuple
+    visited = set()
+    while len(priority_queue) > 0:
+        _cost, loc = heapq.heappop(priority_queue)
+        if debug:
+            print('loc', loc)
+        if loc in visited:
+            continue
+        visited.add(loc)
+        # Check all adjacent nodes
+        for dir in get_open_dirs(grid, loc):
+            # If the current node's cost + cost to the node we're visiting
+            # is less than the previously recorded cost of the node we're visiting,
+            # replace that cost and push the node we're visiting into the priority queue
+            move_loc = coord_move(loc, dir)
+            move_cost = int(grid[move_loc])
+            if debug:
+                print(' dir', dir, 'to', move_loc, 'move_cost', move_cost, 'cur_cost', costs.get(move_loc))
+            if (move_loc not in costs) or (costs[loc] + move_cost < costs[move_loc]):
+                costs[move_loc] = costs[loc] + move_cost
+                heapq.heappush(priority_queue, (costs[move_loc], move_loc))
+    return costs
+
+
+def find_all_endpoints(grid, loc, steps, blockers=[]):
+    '''Find all endpoints that are reachable from a start location in specified number of steps'''
+    memo = {}
+    locs = [loc]
+    for i in range(steps):
+        next_locs = []
+        for loc in locs:
+            if loc in memo:
+                adjacent = memo[loc]
+            else:
+                adjacent = get_open_dirs(grid, loc, blockers, retval='loc')
+                memo[loc] = adjacent
+            next_locs.extend(adjacent)
+            next_locs = list(set(next_locs))
+        locs = next_locs
+    return locs
 
 
 # Algorithms
@@ -293,125 +436,6 @@ def lcm(a, b):
 def lcmm(*args):
     """Return lcm of args."""
     return functools.reduce(lcm, args)
-
-
-# Coordinate system movement
-def coord_move(loc, dir, num_steps=1):
-    dir_deltas = {'N': (0, num_steps),
-                  'S': (0, -1*num_steps),
-                  'E': (num_steps, 0),
-                  'W': (-1*num_steps, 0)}
-    delta = dir_deltas[dir]
-    next_loc = tuple_add(loc, delta)
-    return next_loc
-
-def tuple_add(tuple0, tuple1):
-    return tuple(map(operator.add, tuple0, tuple1))
-
-def tuple_sub(tuple0, tuple1):
-    return tuple(map(operator.sub, tuple0, tuple1))
-
-def coord_turn(current_dir, turn_dir):
-    if turn_dir in ['L', 'l', 'left']:
-        turn = {'N': 'W',
-                'S': 'E',
-                'E': 'N',
-                'W': 'S'}
-    if turn_dir in ['R', 'r', 'right']:
-        turn = {'W': 'N',
-                'E': 'S',
-                'N': 'E',
-                'S': 'W'}
-    if turn_dir in ['reverse']:
-        turn = {'N': 'S',
-                'S': 'N',
-                'E': 'W',
-                'W': 'E'}
-    return turn[current_dir]
-
-def taxi_distance(loc, origin=(0, 0)):
-    diff = tuple(map(operator.sub, loc, origin))
-    return abs(diff[0]) + abs(diff[1])
-
-
-def find_valid_paths(grid, loc_s, loc_e, debug=False):
-    '''BFS to find all valid paths from start to end location'''
-    paths = []
-    visited = {}
-    queue = [{'loc': loc_s, 'steps': 0}]
-    while len(queue) > 0:
-        current = queue.pop()
-        loc = current['loc']
-        steps = current['steps']
-        if loc not in visited or visited[loc] > steps:
-            visited[loc] = steps
-
-            if debug:
-                print('At loc', loc, 'in', steps, 'steps')
-                render_grid(grid, loc)
-
-            if loc == loc_e:
-                if debug:
-                    print('  Found end', loc_e, 'at', steps, 'steps')
-                paths.append(steps)
-            else:
-                for dir in get_open_dirs(grid, loc):
-                    if debug:
-                        print('    Dir', dir)
-                    move_loc = coord_move(loc, dir)
-                    queue.append({'loc': move_loc, 'steps': steps+1})
-    return paths
-
-
-def find_grid_path_costs(grid, loc_s, debug=False):
-    '''
-    Dijkstra's algorithm to find the best costs between start location and all other nodes in the grid
-    Returns a dict with {loc: lowest_cost_from_loc_s}
-    https://pythonalgos.com/2022/08/17/dijkstras-algorithm-in-5-steps-with-python
-    '''
-    costs = {
-        loc_s: 0
-    }
-    priority_queue = [(0, loc_s)]  # (cost, loc) tuple
-    visited = set()
-    while len(priority_queue) > 0:
-        _cost, loc = heapq.heappop(priority_queue)
-        if debug:
-            print('loc', loc)
-        if loc in visited:
-            continue
-        visited.add(loc)
-        # Check all adjacent nodes
-        for dir in get_open_dirs(grid, loc):
-            # If the current node's cost + cost to the node we're visiting
-            # is less than the previously recorded cost of the node we're visiting,
-            # replace that cost and push the node we're visiting into the priority queue
-            move_loc = coord_move(loc, dir)
-            move_cost = int(grid[move_loc])
-            if debug:
-                print(' dir', dir, 'to', move_loc, 'move_cost', move_cost, 'cur_cost', costs.get(move_loc))
-            if (move_loc not in costs) or (costs[loc] + move_cost < costs[move_loc]):
-                costs[move_loc] = costs[loc] + move_cost
-                heapq.heappush(priority_queue, (costs[move_loc], move_loc))
-    return costs
-
-
-def get_open_dirs(grid, loc):
-    opens = []
-    cur_val = grid[loc]
-    for dir in ['N', 'S', 'E', 'W']:
-        next_loc = coord_move(loc, dir)
-        val = grid.get(next_loc)
-        if val is not None:
-            opens.append(dir)
-    return opens
-
-
-def render_grid(grid, loc=None):
-    grid = grid.copy()
-    if loc is not None:
-        grid[loc] = '*'
-    print(grid_dict_to_text(grid))
 
 
 # Util
