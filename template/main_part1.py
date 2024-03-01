@@ -1,6 +1,8 @@
 import sys
 sys.path.append('../..')
 import util
+import pprint
+import re
 
 
 def process_part1(input):
@@ -18,6 +20,7 @@ def test():
     # assert(process_part2(test_input) == )
 
 test()
+# exit(0)
 
 
 with open('input.txt', 'r') as f:
